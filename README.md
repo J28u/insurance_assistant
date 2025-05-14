@@ -55,8 +55,8 @@ Source : [Youtube](https://www.youtube.com/watch?v=y3K4hji9W8g)
 ### 1. Cloner le projet
 
 ```bash
-git clone https://github.com/<ton-username>/<nom-du-repo>.git
-cd <nom-du-repo>
+git clone https://github.com/J28u/insurance_assistant.git
+cd insurance_assistant
 ```
 
 ### 2. Créer une base MongoDB (pour l'historisation des conversations)
