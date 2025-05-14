@@ -68,7 +68,24 @@ cd <nom-du-repo>
 MONGODB_URL = mongodb+srv://<db_username>:<db_password>@cluster0.agni83b.mongodb.net/chatbotdb?retryWrites=true&w=majority&appName=Cluster0
 ```
 
-### 3. Déployer le backend 
+### 3. Déployer le LLM
+- [installer Ollama](https://ollama.com/download)
+- télécharger le modèle choisi depuis Huggingface 
+
+```
+ollama pull hf.co/cognitivecomputations/Dolphin3.0-Llama3.1-8B-GGUF:Q6_K
+```
+- renseigner le nom du modèle dans le frontend (DeepseekInput ligne 79)
+```
+ model: "hf.co/cognitivecomputations/Dolphin3.0-Llama3.1-8B-GGUF:Q6_K"
+```
+- lancer le serveur en arrière plan
+
+```
+ollama serve
+```
+
+### 4. Déployer le backend 
 - installer les dépendances
 ```bash
 cd backend
@@ -77,10 +94,11 @@ npm install
 
 * lancer l'api :
 ```bash
+cd src
 node index.js
 ```
 
-### 4. Déployer le frontend
+### 5. Déployer le frontend
 
 - installer les dépendances
 ```bash
@@ -90,6 +108,7 @@ npm install
 
 * lancer l'application
 ```bash
+cd src
 npm run dev
 ```
 
