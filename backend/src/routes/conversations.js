@@ -81,4 +81,31 @@ router.get("/user/:userId", async (req, res) => {
   }
 });
 
+//Route pour récupérer les messages d'une conversation
+router.get("/onlyone/:conversationId", async (req, res) => {
+  try {
+    const { conversationId } = req.params;
+
+    // Vérifier si la conversation existe
+    const convExists = await Conversation.findById(conversationId);
+    if (!convExists) {
+      return res.status(404).json({ error: "Conversation non trouvée" });
+    }
+
+    // Grâce à .populate("messages"), Mongoose remplace les IDs des messages dans le champ messages par les documents complets correspondants de la collection messages.
+    const conversation = await Conversation.findById(conversationId).populate(
+      "messages"
+    );
+
+    return res.status(200).json({
+      // renvoie la conversation dans un objet json
+      message: "Conversation récupérée",
+      conversation,
+    });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ error: "Erreur serveur" });
+  }
+});
+
 module.exports = router;
