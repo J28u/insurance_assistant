@@ -1,8 +1,8 @@
 import { useState, useRef, useEffect } from "react";
 import { MessageSquare } from "lucide-react";
 import "./style.css";
-import DeepseekInput from "./DeepseekInput.jsx";
-import Conversation from "./Conversation.jsx";
+import DeepseekInput from "./components/DeepseekInput.jsx";
+import Conversation from "./components/Conversation.jsx";
 import axios from "axios";
 
 // ------------------------------------STYLE----------------------------------------------------

@@ -2,7 +2,7 @@
 
 import React from "react";
 import { useState } from "react";
-import "./style.css";
+import "../style.css";
 import { ArrowUp } from "lucide-react";
 import axios from "axios";
 
