@@ -58,4 +58,27 @@ router.post("/", async (req, res) => {
   }
 });
 
+// Route pour récupérer les conversations d'un utilisateur dans MongoDB:
+router.get("/user/:userId", async (req, res) => {
+  try {
+    const { userId } = req.params; // récupère l'ID à partir des paramètres de la requête
+
+    //Vérifier si l'utilisateur existe
+    const userExists = await User.findById(userId);
+    if (!userExists) {
+      return res.status(404).json({ error: "Utilisateur non trouvé" });
+    }
+
+    // Trouver toutes les conversations associées à l'utilisateur
+    const conversations = await Conversation.find({ userId });
+    return res.status(200).json({
+      message: "Conversations récupérées",
+      conversations,
+    });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ error: "Erreur serveur" });
+  }
+});
+
 module.exports = router;
