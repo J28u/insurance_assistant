@@ -68,7 +68,7 @@ cd <nom-du-repo>
 MONGODB_URL = mongodb+srv://<db_username>:<db_password>@cluster0.agni83b.mongodb.net/chatbotdb?retryWrites=true&w=majority&appName=Cluster0
 ```
 
-### 2. Déployer le backend 
+### 3. Déployer le backend 
 - installer les dépendances
 ```bash
 cd backend
@@ -80,7 +80,7 @@ npm install
 node index.js
 ```
 
-### 3. Déployer le frontend
+### 4. Déployer le frontend
 
 - installer les dépendances
 ```bash
