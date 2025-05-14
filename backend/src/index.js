@@ -1,11 +1,31 @@
-const express = require('express')
+const express = require("express");
 const app = express();
+app.use(express.json()); // permettre à express de parser le JSON dans le corps des requêtes
+
 const PORT = 3000;
+const mongoose = require("mongoose");
+const dotenv = require("dotenv");
+dotenv.config(); // charge les variables d'environnement (MONGODB_URL) à partir du fichier .env
 
-app.get('/api/hello', (req, res) => {
-  res.json({ message: 'Hello from backend!' });
-});
+const cors = require("cors");
+app.use(cors()); // pour que notre API accepte les requêtes à partir de toutes les URLs
 
-app.listen(port, () => {
-  console.log(`Example app listening on port ${PORT}`)
+const conversationRoutes = require("./routes/conversations");
+
+// Connection à MongoDB
+async function main() {
+  try {
+    await mongoose.connect(process.env.MONGODB_URL);
+    console.log("Connexion à MongoDB réussie");
+  } catch (error) {
+    console.error("Error connecting to the database:", error);
+  }
+}
+
+main().catch((err) => console.log(err)); // exécute la fonction main et catch l'erreur si il y en a une
+
+app.use("/api/conversations", conversationRoutes); // Quand quelqu'un fait une requête sur /api/conversations on lui retourne ce qu'il y a dans conversationRoutes
+
+app.listen(PORT, () => {
+  console.log(`Example app listening on port ${PORT}`);
 });
