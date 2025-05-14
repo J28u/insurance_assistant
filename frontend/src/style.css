@@ -1,0 +1,82 @@
+.new-chat-button {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  margin: 18px 0px;
+  background-color: #eef2ff;
+  color: #2563eb;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  width: fit-content;
+  font-size: 14px;
+  font-weight: 500;
+  font-family: inherit;
+}
+
+/* pas de bord noir quand le bouton est sélectionné */
+.new-chat-button:focus,
+.new-chat-button:active {
+  outline: none;
+  box-shadow: none;
+}
+
+.new-chat-button:hover {
+  background-color: #ced9fd;
+}
+
+.custom-input {
+  border: none;
+  outline: none;
+  background-color: transparent;
+  font-size: 14px;
+  color: #404040;
+  padding: 4px 0;
+  width: 100%;
+  &::placeholder {
+    color: #9f9c9c;
+  }
+}
+
+.left-buttons {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  height: fit-content;
+  border-radius: 20px;
+  background-color: #ffffff;
+  border: 1px solid rgba(0, 0, 0, 0.12);
+  cursor: pointer;
+  font-size: 10px;
+  color: #4c4c4c;
+  font-weight: 400;
+  transition: background-color 0.1s, color 0.1s;
+}
+
+.left-buttons:hover {
+  background-color: #e0e4ed;
+  color: #4c4c4c;
+  border: 1px solid rgba(0, 0, 0, 0.12);
+}
+
+.paperclip {
+  height: fit-content;
+  background-color: transparent;
+  padding: 7px;
+  border: none;
+}
+
+.paperclip:hover {
+  background-color: #e0e4ed;
+  border: none;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
