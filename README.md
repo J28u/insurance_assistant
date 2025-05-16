@@ -4,16 +4,8 @@ Chatbot à déployer en local pour poser des questions sur ses contrats d'assura
 ## But du projet 
 Développer une application capable d'assister un utilisateur dans la compréhension de ses contrats d'assurance, à l'aide d'un chatbot intelligent.
 
-## Etat actuel (Livrables semaine 6 projet fil rouge)
-
-* ✅  Structure du projet mise en place 
-* ✅  Connexion à MongoDB via Mongoose 
-* ✅  Intégration du LLM (Ollama) 
-* ✅  Interface utilisateur basique (clone de DeepSeek) 
-* ✅  Application fonctionnelle en local 
-
-Source : [Youtube](https://www.youtube.com/watch?v=y3K4hji9W8g)
-
+## Etat actuel (Livrables semaine 7 projet fil rouge) 
+[en cours 🚧]
 
 ## 📁 Structure du projet
 
@@ -127,3 +119,6 @@ npm run dev
 - Envoi de messages à un LLM
 - Historisation dans MongoDB
 - UI dynamique avec React
+
+## 📚 Sources 
+- Tutoriel Clone de DeepSeek : [Youtube](https://www.youtube.com/watch?v=y3K4hji9W8g)
