@@ -30,3 +30,22 @@ def retrieve_relevant_chunks(
     LOGGER.info(f"{len(relevant_chunks)} relevant chunks retrieved from vectorstore")
 
     return relevant_chunks
+
+
+def format_context(relevant_chunks: list[Document]) -> str:
+    """
+    Format a list of relevant document chunks into a single context string for prompting.
+
+    Args:
+        relevant_chunks (list[Document]): List of relevant document chunks.
+
+    Returns:
+        str: Formatted context string.
+    """
+    context_list = []
+    for n, doc in enumerate(relevant_chunks):
+        title = doc.metadata["source"].split("/")[-1].replace(".pdf", "")
+        content = doc.page_content
+        context_list.append(f"Extrait du document '{title}' :\n{content}")
+
+    return "\n".join(context_list)
