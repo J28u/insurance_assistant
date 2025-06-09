@@ -3,6 +3,7 @@
 from kedro.pipeline import Pipeline
 
 from rag.pipelines.embedding.pipeline import create_embedding_pipeline
+from rag.pipelines.rag_classic.pipeline import create_classic_rag_pipeline
 
 
 def register_pipelines() -> dict[str, Pipeline]:
@@ -13,4 +14,6 @@ def register_pipelines() -> dict[str, Pipeline]:
     """
 
     embedding_pipeline = create_embedding_pipeline()
-    return {"embedding": embedding_pipeline}
+    classic_rag = create_classic_rag_pipeline()
+
+    return {"embedding": embedding_pipeline, "classic_rag": classic_rag}
