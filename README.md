@@ -102,7 +102,13 @@ cd insurance_assistant
 MONGODB_URL = mongodb+srv://<db_username>:<db_password>@cluster0.agni83b.mongodb.net/chatbotdb?retryWrites=true&w=majority&appName=Cluster0
 ```
 
-### 3. Déployer le LLM
+### 3. Installation des dépendances Python (Kedro, LangChain, etc.)
+
+```bash
+pip install -r requirements.txt
+```
+
+### 4. Déployer le LLM
 
 - [installer Ollama](https://ollama.com/download)
 - télécharger le modèle choisi depuis Huggingface
@@ -123,7 +129,7 @@ ollama pull hf.co/cognitivecomputations/Dolphin3.0-Llama3.1-8B-GGUF:Q6_K
 ollama serve
 ```
 
-### 4. Déployer le backend
+### 5. Déployer le backend
 
 - installer les dépendances
 
@@ -139,7 +145,7 @@ cd src
 node index.js
 ```
 
-### 5. Déployer le frontend
+### 6. Déployer le frontend
 
 - installer les dépendances
 
@@ -154,6 +160,46 @@ npm install
 cd src
 npm run dev
 ```
+
+### 7. Utilisation des pipelines Kedro
+
+#### Changer le modèle d'embedding utilisé par le rag:
+
+- Le chargement d'un pdf, entraine la création d'un vectorstore FAISS, sauvegardé localement dans ['data/04_feature/'](kedro_pipelines/data/04_feature/)
+- Aller dans [conf/base/parameters.yml](kedro_pipelines/conf/base/parameters.yml)
+
+```bash
+embedding_model_name: "OrdalieTech/Solon-embeddings-large-0.1"
+```
+
+Par défaut, [Solon-embeddings-large-0.1](https://huggingface.co/OrdalieTech/Solon-embeddings-large-0.1) est utilisé.
+
+#### Lancer un pipeline Kedro
+
+- Le dossier [src](kedro_pipelines/src) contient des "packages" Kedro, chaque 'package' contient plusieurs pipelines répertoriés dans un fichier [pipeline_registry](kedro_pipelines/src/rag/pipeline_registry.py).
+
+- Pour choisir quel 'package' faire tourner, il faut modifier le fichier [pyproject.toml](kedro_pipelines/pyproject.toml)
+
+```bash
+[tool.kedro]
+package_name = "rag"
+```
+
+- Pour exécuter un pipeline du package selectionné : kedro run --pipeline <nom_du_pipeline>
+
+```bash
+kedro run --pipeline embedding
+```
+
+Vous trouverez les noms de pipelines à exécuter dans [pipeline_registry](kedro_pipelines/src/rag/pipeline_registry.py). Par exemple: embedding, classic_rag.
+
+Pour plus d'options, veuillez consulter la documentation [Kedro](https://docs.kedro.org)
+
+#### Bonnes pratiques Kedro
+
+- Ne supprimez aucune ligne du fichier .gitignore fourni.
+- Ne versionnez pas de données dans votre dépôt. Gardez les dans ['data/'](kedro_pipelines/data)
+- Ne versionnez pas de mots de passe ou de configuration locale dans votre dépôt. Gardez toutes vos informations sensibles et configurations locales dans ['conf/local/'](kedro_pipelines/conf/local/).
 
 ## 📡 API - Endpoint principaux
 
