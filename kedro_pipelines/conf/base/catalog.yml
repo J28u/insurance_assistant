@@ -7,3 +7,12 @@
 vectorstore:
   type: rag.datasets.faiss_vectorstore_dataset.FaissVectorstoreDataset
   filepath: data/04_feature/vectorstore.pkl
+
+############### CLASSIC RAG PIPELINE ###############
+prompt_template:
+  type: text.TextDataset
+  filepath: conf/prompt_template/prompt_assistant.txt
+
+question:
+  type: text.TextDataset
+  filepath: data/01_raw/question.txt
