@@ -102,7 +102,7 @@ cd insurance_assistant
 MONGODB_URL = mongodb+srv://<db_username>:<db_password>@cluster0.agni83b.mongodb.net/chatbotdb?retryWrites=true&w=majority&appName=Cluster0
 ```
 
-### 3. Installation des dépendances Python (Kedro, LangChain, etc.)
+### 3. Installer les dépendances Python (Kedro, LangChain, etc.)
 
 ```bash
 pip install -r requirements.txt
@@ -206,6 +206,8 @@ Pour plus d'options, veuillez consulter la documentation [Kedro](https://docs.ke
 - POST /api/conversations/ : créer une nouvelle conversation
 - GET /api/conversations/user/:userId : récupérer les conversations d’un utilisateur
 - GET /api/conversations/onlyone/:conversationId : récupérer les messages d’une conversation
+- POST /api/upload/ : charger des pdfs, les découper en chunks et sauvegarder leurs embeddings dans une base vectorielle.
+- GET /api/retriever/prompt_with_context/:question : récupérer un prompt enrichi d'un contexte pertinent.
 
 ## 🧩 Composants React
 
