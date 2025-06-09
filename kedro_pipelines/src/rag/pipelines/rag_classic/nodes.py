@@ -1,5 +1,6 @@
 import logging
 
+from langchain.prompts import PromptTemplate
 from langchain_community.vectorstores import FAISS
 from langchain_core.documents.base import Document
 
@@ -49,3 +50,25 @@ def format_context(relevant_chunks: list[Document]) -> str:
         context_list.append(f"Extrait du document '{title}' :\n{content}")
 
     return "\n".join(context_list)
+
+
+def build_prompt_with_context_and_question(
+    prompt_template: str, context: str, question: str
+) -> str:
+    """
+    Build a prompt for the LLM by injecting the context and question into a template.
+
+    Args:
+        prompt_template (str): The prompt template with placeholders for context and question.
+        context (str): The formatted context string.
+        question (str): The user's question.
+
+    Returns:
+        str: The final prompt ready for the LLM.
+    """
+    prompt = PromptTemplate(
+        template=prompt_template, input_variables=["context", "question"]
+    )
+    prompt_text = prompt.format(context=context, question=question)
+
+    return prompt_text
