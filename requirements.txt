@@ -1,0 +1,15 @@
+ipython>=8.10
+kedro~=0.19.12
+kedro-boot==0.2.4
+kedro-datasets==7.0.0
+langchain==0.3.25
+langchain-community==0.3.24
+langchain-core==0.3.64
+langchain-huggingface==0.2.0
+langchain-text-splitters==0.3.8
+sentence-transformers==4.1.0
+numpy==2.2.5
+ollama==0.5.1
+pandas==2.2.3
+PyMuPDF==1.25.5
+tqdm==4.67.1
