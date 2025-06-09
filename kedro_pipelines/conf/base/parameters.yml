@@ -4,3 +4,10 @@ chunk_size: 450
 chunk_overlap: 80
 separators: ["\n\n", "\n"]
 pdf_paths: ["data/01_raw/CG_habitation_RP_protectrice.pdf"]
+
+############ CLASSIC RAG PIPELINE ############
+top_k_retriever: 3
+retriever_config:
+  search_type: "similarity"
+  search_kwargs:
+    k: 3
