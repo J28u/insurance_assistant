@@ -1,41 +1,82 @@
 # 🤓☂️ Personal Insurance Chatbot — Fullstack JS (Vite + Express + MongoDB)
-Chatbot à déployer en local pour poser des questions sur ses contrats d'assurance sans envoyer ses infos persos à OpenAi. 
 
-## But du projet 
+Chatbot à déployer en local pour poser des questions sur ses contrats d'assurance sans envoyer ses infos persos à OpenAi.
+
+## But du projet
+
 Développer une application capable d'assister un utilisateur dans la compréhension de ses contrats d'assurance, à l'aide d'un chatbot intelligent.
 
-## Etat actuel (Livrables semaine 7 projet fil rouge) 
+## Etat actuel (Livrables semaine 7 projet fil rouge)
+
 [en cours 🚧]
 
 ## 📁 Structure du projet
 
 ```
 .
-├── backend/                # API Express + Mongoose
+├── backend/                        # Backend Node.js : API Express + Mongoose (MongoDB)
 │   └── src/
-│       └── models/         # Schémas Mongoose pour les collections MongoDB
-│       │   ├── Conversation.js 
-│       │   ├── Message.js 
+│       ├── models/                 # Schémas Mongoose pour les collections MongoDB
+│       │   ├── Conversation.js
+│       │   ├── Message.js
 │       │   └── User.js
-│       └── routes/         # Routes Express pour l'API
-│           └── conversations.js # Gestion des routes pour les conversations
-│       └── index.js        # Connexion à la base de données et configuration des routes
+│       ├── routes/                 # Routes Express pour l'API REST
+│       │   └── conversations.js    # Routes pour la gestion des conversations
+│       └── index.js                # Point d'entrée backend : connexion DB et configuration des routes
 │
-├── frontend/               # Frontend React avec Vite
-│   ├── public/             # Fichiers statiques accessibles par le navigateur
+├── frontend/                       # Frontend React (Vite)
+│   ├── public/                     # Fichiers statiques accessibles par le navigateur
 │   └── src/
-│       ├── assets/         # Ressources pour l'application (images, polices, etc.)
-│       ├── components/     # Composants React utilisés dans l'application
+│       ├── assets/                 # Images, polices, etc.
+│       ├── components/             # Composants React réutilisables
 │       │   ├── Conversation.jsx
 │       │   └── DeepseekInput.jsx
-│       ├── App.jsx         # Composant principal définissant l'interface utilisateur (UI)
-│       ├── index.css       # Styles globaux pour l'application
-│       ├── main.jsx        # Point d'entrée principal du frontend React
-│       └── style.css       # Styles spécifiques pour les boutons, spinner et zone de prompt
+│       ├── App.jsx                 # Composant racine de l'application
+│       ├── index.css               # Styles globaux
+│       ├── main.jsx                # Point d'entrée principal React
+│       └── style.css               # Styles spécifiques (boutons, spinner, etc.)
 │
-└── README.md               # Fichier de documentation du projet
+├── kedro_pipelines/                # Pipelines de Machine Learning/Data avec Kedro
+│   ├── conf/                       # Configuration Kedro (catalogues, paramètres, logs, prompts)
+│   │   ├── base/
+│   │   │   ├── catalog.yml         # Définition des datasets (inputs/outputs)
+│   │   │   └── parameters.yml      # Paramètres globaux des pipelines
+│   │   ├── local/
+│   │   │   └── credentials.yml     # Secrets et credentials (non versionnés)
+│   │   ├── prompt_template/
+│   │   │   └── prompt_assistant.txt # Template de prompt pour le RAG (contexte + question)
+│   │   ├── logging.yml             # Configuration des logs Kedro
+│   │   └── README.md               # Documentation des configs (générée par Kedro)
+│   ├── data/                       # Données du pipeline (non versionnées)
+│   │   ├── 01_raw/                 # Données brutes
+│   │   ├── 02_intermediate/        # Données intermédiaires
+│   │   ├── 03_primary/             # Données primaires
+│   │   ├── 04_feature/             # Features extraites
+│   │   ├── 05_model_input/         # Données prêtes pour les modèles
+│   │   ├── 06_models/              # Modèles entraînés
+│   │   ├── 07_model_output/        # Prédictions, résultats de modèles
+│   │   └── 08_reporting/           # Rapports, visualisations
+│   ├── src/
+│   │   └── rag/                    # Package principal Kedro
+│   │       ├── datasets/           # Datasets personnalisés (ex: FAISS)
+│   │       │   └── faiss_vectorstore_dataset.py
+│   │       ├── pipelines/
+│   │       │   ├── embedding/      # Pipeline d'embedding (vectorisation des documents)
+│   │       │   │   ├── nodes.py
+│   │       │   │   └── pipeline.py
+│   │       │   └── rag_classic/    # Pipeline RAG classique (retrieval + prompt)
+│   │       │       ├── nodes.py
+│   │       │       └── pipeline.py
+│   │       ├── __main__.py         # Entrée CLI du package Kedro
+│   │       ├── pipeline_registry.py# Déclaration des pipelines disponibles
+│   │       ├── run_kedro.py        # Script de lancement d'un pipeline via kedro-boot
+│   │       └── settings.py         # Hooks et configuration avancée Kedro
+│   └── pyproject.toml              # Packaging, dépendances et config du sous-projet Kedro
+│
+├── requirements.txt                # Dépendances Python globales du projet
+├── .gitignore                      # Fichiers et dossiers à ignorer par git
+└── README.md                       # Documentation principale du projet
 ```
-
 
 ## 🚀 Installation [partie en construction 🚧]
 
@@ -52,6 +93,7 @@ cd insurance_assistant
 ```
 
 ### 2. Créer une base MongoDB (pour l'historisation des conversations)
+
 - appeler cette base 'chatbotdb'
 - créer une collection users avec un utilisateur dont l'id est 68235ea293d0a7e8eab16d47
 - créer un fichier .env dans /backend/src avec les variables suivantes :
@@ -61,30 +103,37 @@ MONGODB_URL = mongodb+srv://<db_username>:<db_password>@cluster0.agni83b.mongodb
 ```
 
 ### 3. Déployer le LLM
+
 - [installer Ollama](https://ollama.com/download)
-- télécharger le modèle choisi depuis Huggingface 
+- télécharger le modèle choisi depuis Huggingface
 
 ```
 ollama pull hf.co/cognitivecomputations/Dolphin3.0-Llama3.1-8B-GGUF:Q6_K
 ```
+
 - renseigner le nom du modèle dans le frontend (DeepseekInput ligne 79)
+
 ```
  model: "hf.co/cognitivecomputations/Dolphin3.0-Llama3.1-8B-GGUF:Q6_K"
 ```
+
 - lancer le serveur en arrière plan
 
 ```
 ollama serve
 ```
 
-### 4. Déployer le backend 
+### 4. Déployer le backend
+
 - installer les dépendances
+
 ```bash
 cd backend
 npm install
 ```
 
-* lancer l'api :
+- lancer l'api :
+
 ```bash
 cd src
 node index.js
@@ -93,32 +142,38 @@ node index.js
 ### 5. Déployer le frontend
 
 - installer les dépendances
+
 ```bash
 cd frontend
 npm install
 ```
 
-* lancer l'application
+- lancer l'application
+
 ```bash
 cd src
 npm run dev
 ```
 
 ## 📡 API - Endpoint principaux
+
 - POST /api/conversations/ : créer une nouvelle conversation
 - GET /api/conversations/user/:userId : récupérer les conversations d’un utilisateur
 - GET /api/conversations/onlyone/:conversationId : récupérer les messages d’une conversation
 
 ## 🧩 Composants React
+
 - DeepseekInput.jsx : champ de message + boutons pour interagir avec le LLM
 - Conversation.jsx : affichage de la conversation (titre, messages utilisateur et LLM)
 - App.jsx : assemble l’interface
 
 ## ✨ Fonctionnalités
+
 - Création d'une conversation
 - Envoi de messages à un LLM
 - Historisation dans MongoDB
 - UI dynamique avec React
 
-## 📚 Sources 
+## 📚 Sources
+
 - Tutoriel Clone de DeepSeek : [Youtube](https://www.youtube.com/watch?v=y3K4hji9W8g)
