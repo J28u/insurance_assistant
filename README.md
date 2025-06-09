@@ -8,7 +8,12 @@ Développer une application capable d'assister un utilisateur dans la compréhen
 
 ## Etat actuel (Livrables semaine 7 projet fil rouge)
 
-[en cours 🚧]
+- ✅ Intégration d'un RAG classique (Dense Retriever)
+- ✅ Stockage de la base vectorielle FAISS en local
+- ✅ Chargement de pdfs via l'interface utilisateur
+- ✅ Endpoint pour l'upload de PDF et la vectorisation automatique
+- ✅ Endpoint pour récupérer un prompt enrichi du contexte pertinent
+- ✅ Séparation claire backend / frontend / pipelines ML
 
 ## 📁 Structure du projet
 
