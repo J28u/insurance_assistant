@@ -3,7 +3,9 @@ from functools import partial
 
 from langchain.document_loaders import PyMuPDFLoader
 from langchain.text_splitter import RecursiveCharacterTextSplitter
+from langchain_community.vectorstores import FAISS
 from langchain_core.documents.base import Document
+from langchain_huggingface import HuggingFaceEmbeddings
 from tqdm import tqdm
 from transformers import AutoTokenizer
 
@@ -62,3 +64,31 @@ def split_pdfs_into_chunks(
         all_docs_chunks.extend(text_splitter.split_documents(pdf_pages_list))
 
     return all_docs_chunks
+
+
+def create_faiss_vectorstore_from_chunks(
+    chunks: list[Document], embedding_model_name: str
+) -> FAISS:
+    """
+    Generate vector embeddings for a list of document chunks and store them in a FAISS vectorstore.
+
+    Args:
+        chunks (list[Document]): List of Langchain Document chunks to embed.
+        embedding_model_path (str): Path or name of the pre-trained embedding model.
+
+    Returns:
+        FAISS: A FAISS vectorstore containing the embedded document chunks.
+    """
+    embedding_function = HuggingFaceEmbeddings(model_name=embedding_model_name)
+    list_ids = [n for n in range(len(chunks))]
+
+    LOGGER.info(f"Creating embeddings for {len(chunks)} chunks...")
+
+    db = FAISS.from_documents(chunks, embedding_function, ids=list_ids)
+
+    LOGGER.info(
+        f"Successfully generated embeddings for {db.index.ntotal} chunks. "
+        f"Each embedding has a vector size of {db.index.d} "
+    )
+
+    return db
