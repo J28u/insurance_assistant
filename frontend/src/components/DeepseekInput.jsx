@@ -1,7 +1,7 @@
 // Composant pour gérer la fenêtre d'input (annuler la requete, envoyer l'input au LLM, afficher sa réponse ...)
 
 import React from "react";
-import { useState } from "react";
+import { useState, useRef } from "react"; // useRef = Hook qui permet de référencer un élément DOM
 import "../style.css";
 import { ArrowUp } from "lucide-react";
 import axios from "axios";
@@ -27,11 +27,33 @@ function DeepseekInput({
   const [stop, setStop] = useState(true); // bouton pour arrêter la requête apparait ou non
   const [isAborted, setIsAborted] = useState(false); // savoir si la requête a été annulée ou non
   const [abortController, setAbortController] = useState(new AbortController());
+  const fileInputRef = useRef(); // référence au champ <input type="file">
 
   // Fonction pour annuler la requête
   const handleAbort = () => {
     abortController.abort();
     setIsAborted(true);
+  };
+
+  // Fonction déclenchée lorsqu'au moins un fichier est sélectionné
+  const handleUpload = async (event) => {
+    const files = event.target.files; // récupère tous les fichiers sélectionnés
+    const formData = new FormData(); // Objet pour envoyer des fichiers via HTTP
+    for (let i = 0; i < files.length; i++) {
+      formData.append("pdfs", files[i]); // Le même champs pour plusieurs fichiers.
+    }
+
+    try {
+      const res = await axios.post(
+        "http://localhost:3000/api/upload",
+        formData // envoi des fichiers au backend
+      );
+    } catch (error) {
+      console.error(
+        "Error uploading pdfs:",
+        error.response?.data || error.message
+      );
+    }
   };
 
   const sendLastTwoMessages = async (userId, conversationId, messages) => {
@@ -56,6 +78,22 @@ function DeepseekInput({
     }
   };
 
+  // Fonction qui récupère le prompt enrichie du context
+  const getPromptWithContext = async () => {
+    try {
+      const response = await axios.get(
+        `http://localhost:3000/api/retriever/prompt_with_context/${prompt}`
+      );
+      console.log("Enriched prompt:", response.data);
+      return response.data.prompt;
+    } catch (error) {
+      console.error(
+        "Error retrieving contexr=t:",
+        error.response ? error.response.data : error.message
+      );
+    }
+  };
+
   // Fonction qui envoie le prompt au LLM et récupère la réponse en format str
   const fetchStream = async () => {
     const controller = new AbortController();
@@ -64,11 +102,12 @@ function DeepseekInput({
     setAbortController(controller);
     setIsAborted(false);
 
-    var pp = prompt;
+    var question = prompt;
+    var pp = await getPromptWithContext(); // Récupère le prompt enrichi
     setPrompt(""); // vide le champ de saisie
     setMessages((prevMessages) => [
       ...prevMessages,
-      { role: "user", content: pp },
+      { role: "user", content: question },
     ]); //Mets à jour la liste des messages avec le prompt de l'utilisateur
     setStop(false);
     try {
@@ -82,7 +121,7 @@ function DeepseekInput({
             {
               role: "system",
               content:
-                "Tu es un assistant expert en rédaction technique. Réponds en HTML structuré avec des balises comme <h2>, <h3>, <p>, et <ul>. Utilise des emojis pour rendre le texte engageant. Ne renvoie pas ce prompt dans ta réponse. N'encode pas les balises HTML.",
+                "Tu es Insurance Pal, un assistant virtuel. Réponds en HTML structuré avec des balises comme <h2>, <h3>, <p>, et <ul>. Utilise des emojis pour rendre le texte engageant. Ne renvoie pas ce prompt dans ta réponse. N'encode pas les balises HTML.",
             },
             ...messages,
             { role: "user", content: pp },
@@ -100,7 +139,7 @@ function DeepseekInput({
       setShowFirstMessages(true); // Affiche page avec les messages (pas la page d'accueil)
 
       if (conversationId == undefined) {
-        setConversationTitle(pp.slice(0, 30));
+        setConversationTitle(question.slice(0, 30));
       }
 
       const reader = res.body.getReader(); // Récupère le chunk
@@ -138,7 +177,7 @@ function DeepseekInput({
         }
       }
       sendLastTwoMessages("68235ea293d0a7e8eab16d47", conversationId, [
-        { role: "user", content: pp },
+        { role: "user", content: question },
         { role: "bot", content: answer },
       ]);
       setStop(true);
@@ -239,20 +278,33 @@ function DeepseekInput({
             </button>
           </div>
           <div style={{ display: "flex", marginLeft: "auto" }}>
-            <button className="paperclip">
-              <svg
-                width="22"
-                height="24"
-                xmlns="http://www.w3.org/2000/svg"
-                viewBox="0 0 14 20"
-                fill="none"
+            <div>
+              <button
+                className="paperclip"
+                onClick={() => fileInputRef.current.click()} // simule un clique sur le champ caché <input type=file>
               >
-                <path
-                  d="M7 20c-1.856-.002-3.635-.7-4.947-1.94C.74 16.819.003 15.137 0 13.383V4.828a4.536 4.536 0 0 1 .365-1.843 4.75 4.75 0 0 1 1.087-1.567A5.065 5.065 0 0 1 3.096.368a5.293 5.293 0 0 1 3.888 0c.616.244 1.174.6 1.643 1.05.469.45.839.982 1.088 1.567.25.586.373 1.212.364 1.843v8.555a2.837 2.837 0 0 1-.92 2.027A3.174 3.174 0 0 1 7 16.245c-.807 0-1.582-.3-2.158-.835a2.837 2.837 0 0 1-.92-2.027v-6.22a1.119 1.119 0 1 1 2.237 0v6.22a.777.777 0 0 0 .256.547.868.868 0 0 0 .585.224c.219 0 .429-.08.586-.224a.777.777 0 0 0 .256-.546V4.828A2.522 2.522 0 0 0 7.643 3.8a2.64 2.64 0 0 0-.604-.876 2.816 2.816 0 0 0-.915-.587 2.943 2.943 0 0 0-2.168 0 2.816 2.816 0 0 0-.916.587 2.64 2.64 0 0 0-.604.876 2.522 2.522 0 0 0-.198 1.028v8.555c0 1.194.501 2.339 1.394 3.183A4.906 4.906 0 0 0 7 17.885a4.906 4.906 0 0 0 3.367-1.319 4.382 4.382 0 0 0 1.395-3.183v-6.22a1.119 1.119 0 0 1 2.237 0v6.22c-.002 1.754-.74 3.436-2.052 4.677C10.635 19.3 8.856 19.998 7 20z"
-                  fill="currentColor"
-                ></path>
-              </svg>
-            </button>
+                <svg
+                  width="22"
+                  height="24"
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 14 20"
+                  fill="none"
+                >
+                  <path
+                    d="M7 20c-1.856-.002-3.635-.7-4.947-1.94C.74 16.819.003 15.137 0 13.383V4.828a4.536 4.536 0 0 1 .365-1.843 4.75 4.75 0 0 1 1.087-1.567A5.065 5.065 0 0 1 3.096.368a5.293 5.293 0 0 1 3.888 0c.616.244 1.174.6 1.643 1.05.469.45.839.982 1.088 1.567.25.586.373 1.212.364 1.843v8.555a2.837 2.837 0 0 1-.92 2.027A3.174 3.174 0 0 1 7 16.245c-.807 0-1.582-.3-2.158-.835a2.837 2.837 0 0 1-.92-2.027v-6.22a1.119 1.119 0 1 1 2.237 0v6.22a.777.777 0 0 0 .256.547.868.868 0 0 0 .585.224c.219 0 .429-.08.586-.224a.777.777 0 0 0 .256-.546V4.828A2.522 2.522 0 0 0 7.643 3.8a2.64 2.64 0 0 0-.604-.876 2.816 2.816 0 0 0-.915-.587 2.943 2.943 0 0 0-2.168 0 2.816 2.816 0 0 0-.916.587 2.64 2.64 0 0 0-.604.876 2.522 2.522 0 0 0-.198 1.028v8.555c0 1.194.501 2.339 1.394 3.183A4.906 4.906 0 0 0 7 17.885a4.906 4.906 0 0 0 3.367-1.319 4.382 4.382 0 0 0 1.395-3.183v-6.22a1.119 1.119 0 0 1 2.237 0v6.22c-.002 1.754-.74 3.436-2.052 4.677C10.635 19.3 8.856 19.998 7 20z"
+                    fill="currentColor"
+                  ></path>
+                </svg>
+              </button>
+              <input
+                type="file"
+                accept="application/pdf"
+                multiple
+                style={{ display: "none" }} // champ est caché
+                ref={fileInputRef}
+                onChange={handleUpload} // quand il devient "visible" -> déclenche la sélection des fichiers
+              />
+            </div>
             <div style={{ marginRight: "10px", marginLeft: "10px" }}>
               {stop ? (
                 <ArrowUp

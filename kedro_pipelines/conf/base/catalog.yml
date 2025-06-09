@@ -1,0 +1,18 @@
+# Here you can define all your datasets by using simple YAML syntax.
+#
+# Documentation for this file format can be found in "The Data Catalog"
+# Link: https://docs.kedro.org/en/stable/data/data_catalog.html
+
+############### EMBEDDING PIPELINE ###############
+vectorstore:
+  type: rag.datasets.faiss_vectorstore_dataset.FaissVectorstoreDataset
+  filepath: data/04_feature/vectorstore.pkl
+
+############### CLASSIC RAG PIPELINE ###############
+prompt_template:
+  type: text.TextDataset
+  filepath: conf/prompt_template/prompt_assistant.txt
+
+question:
+  type: text.TextDataset
+  filepath: data/01_raw/question.txt
