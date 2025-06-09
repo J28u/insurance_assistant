@@ -1,0 +1,6 @@
+############ EMBEDDING PIPELINE ############
+embedding_model_name: "OrdalieTech/Solon-embeddings-large-0.1"
+chunk_size: 450
+chunk_overlap: 80
+separators: ["\n\n", "\n"]
+pdf_paths: ["data/01_raw/CG_habitation_RP_protectrice.pdf"]
