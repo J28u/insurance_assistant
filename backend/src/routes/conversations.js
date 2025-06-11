@@ -8,7 +8,7 @@ const router = express.Router();
 // Route pour créer une nouvelle conversation dans MongoDB
 router.post("/", async (req, res) => {
   try {
-    const { userId, conversationId, messages } = req.body;
+    const { userId, conversationId, messages, title } = req.body;
 
     // Vérifier si l'utilisateur existe
     const userExists = await User.findById(userId);
@@ -22,8 +22,6 @@ router.post("/", async (req, res) => {
       if (!messages || messages.length === 0) {
         return res.status(400).json({ error: "Aucun message fourni" });
       }
-
-      const title = messages[0].content.slice(0, 30); // Extraire le titre du message
 
       // Créer la conversation
       conversation = new Conversation({ userId, title });

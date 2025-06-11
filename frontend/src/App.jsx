@@ -20,7 +20,7 @@ const styles = {
     backgroundColor: "#F5F8F5",
     padding: "10px",
     borderRight: "none",
-    overflowY: "auto",
+    overflowY: "auto", // Permet le défilement vertical si le contenu dépasse la hauteur de l'élément.
   },
   mainContent: {
     width: "100vw",

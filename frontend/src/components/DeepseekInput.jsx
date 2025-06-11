@@ -56,7 +56,24 @@ function DeepseekInput({
     }
   };
 
-  const sendLastTwoMessages = async (userId, conversationId, messages) => {
+  // Fonction pour créer un titre propre pour une conversation à partir de la question de l'utilisateur
+  const cleanTitle = (text, maxLength = 30) => {
+    if (!text) return "";
+    if (text.length <= maxLength) return text;
+    let truncated = text.slice(0, maxLength);
+    const lastSpace = truncated.lastIndexOf(" ");
+    if (lastSpace > 0) {
+      truncated = truncated.slice(0, lastSpace);
+    }
+    return truncated + "…";
+  };
+
+  const sendLastTwoMessages = async (
+    userId,
+    conversationId,
+    title,
+    messages
+  ) => {
     try {
       const response = await axios.post(
         "http://localhost:3000/api/conversations",
@@ -64,6 +81,7 @@ function DeepseekInput({
           userId: userId,
           conversationId: conversationId,
           messages: messages,
+          title: title,
         }
       );
       setConversationId(response.data.conversationId);
@@ -128,7 +146,7 @@ function DeepseekInput({
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          model: "hf.co/cognitivecomputations/Dolphin3.0-Llama3.1-8B-GGUF:Q6_K",
+          model: "gemma2:2b",
           messages: [
             {
               role: "system",
@@ -150,7 +168,7 @@ function DeepseekInput({
       setShowFirstMessages(true); // Affiche page avec les messages (pas la page d'accueil)
 
       if (conversationId == undefined) {
-        setConversationTitle(question.slice(0, 30));
+        setConversationTitle(cleanTitle(question));
       }
 
       const reader = res.body.getReader(); // Récupère le chunk
@@ -187,10 +205,15 @@ function DeepseekInput({
           });
         }
       }
-      sendLastTwoMessages("68235ea293d0a7e8eab16d47", conversationId, [
-        { role: "user", content: question },
-        { role: "assistant", content: answer },
-      ]);
+      sendLastTwoMessages(
+        "68235ea293d0a7e8eab16d47",
+        conversationId,
+        cleanTitle(question),
+        [
+          { role: "user", content: question },
+          { role: "assistant", content: answer },
+        ]
+      );
       setStop(true);
       const endTime = performance.now(); // fin chrono
       const duration = endTime - startTime;
@@ -265,7 +288,7 @@ function DeepseekInput({
                   strokeWidth=".2"
                 ></path>
               </svg>
-              <span>DeepThink (R1)</span>
+              <span></span>
             </button>
             <button className="left-buttons">
               <svg
