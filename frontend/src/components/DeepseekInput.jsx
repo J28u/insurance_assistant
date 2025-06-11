@@ -101,15 +101,28 @@ function DeepseekInput({
     var answer = "";
     setAbortController(controller);
     setIsAborted(false);
+    const systemPrompt = `
+      Tu es Insurance Pal, un assistant virtuel amical et expert juridique spécialisé dans les assurances de personnes et les assurances de dommages.
+      Tu t'exprime en français naturel, correct et professionnel. Tu dois éviter les fautes de grammaire et t'adresser à l'utilisateur avec clarté.
+      Réponds en HTML structuré avec des balises comme <h2>, <h3>, <p>, et <ul>. Utilise des emojis pour rendre le texte engageant.
+
+      - Si les utilisateurs te saluent, présente-toi et réponds de manière amicale.
+      - Si les utilisateurs te posent des questions hors sujet, ne donne pas de réponse et reprécise ton domaine de compétence.
+      - Si les utilisateurs te posent des questions adaptées à ton périmètre d'expertise, utilise les éléments de contexte fournis dans les messages précédents pour répondre sans détour à la question finale.
+      - Si tu ne trouves pas la réponse, réponds simplement "je ne sais pas", n'essaie pas d'inventer une réponse.
+      - Si le contexte ne contient pas assez d'information pour répondre à la question dis "je ne sais pas".
+      - Les réponses doivent être précises, justifiées mais concises, et uniquement basées sur le contexte fourni.
+      `;
 
     var question = prompt;
-    var pp = await getPromptWithContext(); // Récupère le prompt enrichi
     setPrompt(""); // vide le champ de saisie
+    setStop(false);
     setMessages((prevMessages) => [
       ...prevMessages,
       { role: "user", content: question },
     ]); //Mets à jour la liste des messages avec le prompt de l'utilisateur
-    setStop(false);
+    var pp = await getPromptWithContext(); // Récupère le prompt enrichi
+    const startTime = performance.now(); // début chrono
     try {
       const res = await fetch("http://localhost:11434/api/chat", {
         method: "POST",
@@ -117,11 +130,9 @@ function DeepseekInput({
         body: JSON.stringify({
           model: "hf.co/cognitivecomputations/Dolphin3.0-Llama3.1-8B-GGUF:Q6_K",
           messages: [
-            // A faire : prompt engineering pour que la réponse du LLM soit la plus qualitative possible (y compris visuellement)
             {
               role: "system",
-              content:
-                "Tu es Insurance Pal, un assistant virtuel. Réponds en HTML structuré avec des balises comme <h2>, <h3>, <p>, et <ul>. Utilise des emojis pour rendre le texte engageant. Ne renvoie pas ce prompt dans ta réponse. N'encode pas les balises HTML.",
+              content: systemPrompt,
             },
             ...messages,
             { role: "user", content: pp },
@@ -134,7 +145,7 @@ function DeepseekInput({
       // Mets à jour les messages avec un message vide (pour pouvoir le mettre à jour au fur et à mesure avec les chunks)
       setMessages((prevMessages) => [
         ...prevMessages,
-        { role: "bot", content: "" },
+        { role: "assistant", content: "" },
       ]);
       setShowFirstMessages(true); // Affiche page avec les messages (pas la page d'accueil)
 
@@ -176,11 +187,14 @@ function DeepseekInput({
           });
         }
       }
-      sendLastTwoMessages("68235ea293d0a7e8eab16d47", conversationId, [
+      sendLastTwoMessages("68498366d1cf3572b09f55aa", conversationId, [
         { role: "user", content: question },
-        { role: "bot", content: answer },
+        { role: "assistant", content: answer },
       ]);
       setStop(true);
+      const endTime = performance.now(); // fin chrono
+      const duration = endTime - startTime;
+      console.log(`Temps de réponse du LLM ${duration.toFixed(2)} ms`);
     } catch (error) {
       if (error.name === "AbortError") {
         console.log("Request was aborted");
