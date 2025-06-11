@@ -102,7 +102,7 @@ function DeepseekInput({
     setAbortController(controller);
     setIsAborted(false);
     const systemPrompt = `
-      Tu es Insurance Pal, un assistant virtuel amical et expert juridique spécialisé dans les assurances de personnes et les assurances de dommages.
+      Tu es Macaron, un assistant virtuel amical et expert juridique spécialisé dans les assurances de personnes et les assurances de dommages.
       Tu t'exprime en français naturel, correct et professionnel. Tu dois éviter les fautes de grammaire et t'adresser à l'utilisateur avec clarté.
       Réponds en HTML structuré avec des balises comme <h2>, <h3>, <p>, et <ul>. Utilise des emojis pour rendre le texte engageant.
 
@@ -227,7 +227,7 @@ function DeepseekInput({
             value={prompt}
             className="custom-input"
             type="text"
-            placeholder="Message Insurance Pal"
+            placeholder="Poser une question"
             // Met à jour la variable prompt si input change
             onChange={(e) => {
               setPrompt(e.target.value);

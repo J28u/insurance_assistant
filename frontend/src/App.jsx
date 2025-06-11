@@ -360,7 +360,7 @@ function App() {
                         fontSize: "20px",
                       }}
                     >
-                      Hi, I'm Insurance Pal.
+                      Bonjour, je suis Macaron, votre assistant assurance.
                     </div>
                   </div>
                 </div>
@@ -377,7 +377,7 @@ function App() {
                     marginTop: "5px",
                   }}
                 >
-                  How can I help you today ?
+                  Posez-moi vos questions, je suis là pour sucrer vos doutes.
                 </div>
               </div>
             </div>
