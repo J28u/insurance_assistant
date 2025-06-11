@@ -2,10 +2,10 @@ import { useState, useRef, useEffect } from "react";
 import { MessageSquare } from "lucide-react";
 import { FileStack } from "lucide-react";
 import "./style.css";
-import DeepseekInput from "./components/DeepseekInput.jsx";
-import Conversation from "./components/Conversation.jsx";
+import Home from "./components/Home.jsx";
+import Chat from "./components/Chat.jsx";
+import Library from "./components/Library.jsx";
 import axios from "axios";
-import macaronIcon from "./assets/macaron.png";
 
 // ------------------------------------STYLE----------------------------------------------------
 
@@ -58,6 +58,7 @@ const styles = {
 // ---------------------------------------------------------------------------------------------
 
 function App() {
+  const [view, setView] = useState("home"); // affichage dans la partie "Main Content" - par défaut l'accueil
   const [conversationId, setConversationId] = useState(undefined);
   const containerRef = useRef(null);
   const [response, setResponse] = useState(""); // affiche dynamiquement la réponse du LLM
@@ -71,6 +72,9 @@ function App() {
   const [showFirstMessages, setShowFirstMessages] = useState(false);
   const [newChat, setNewChat] = useState(true);
   const [newConversation, setNewConversation] = useState(false);
+  const [contrats, setContrats] = useState([
+    "CG_habitation_RP_protectrice.pdf",
+  ]);
 
   // ------------------------------------- FONCTIONS -------------------------------------------------------------
 
@@ -167,6 +171,13 @@ function App() {
     }
   }, [messages]); // chaque fois que la variable messages se met à jour, on scrolle tout en bas du container
 
+  useEffect(() => {
+    // Quand conversationId ou showFirstMessages changent, vérifie si l’un des deux est défini. Si oui, passe la vue à chat.
+    if (conversationId || showFirstMessages) {
+      setView("chat");
+    }
+  }, [conversationId, showFirstMessages]);
+
   // ----------------------------------------------------------------------------------------------------------------------------------
 
   // -----------------------------------------------AFFICHAGE-----------------------------------
@@ -200,13 +211,19 @@ function App() {
             setNewChat(true);
             setShowFirstMessages(false);
             setMessages([]);
+            setView("home");
           }}
           className="new-chat-button"
         >
           <MessageSquare size={20} />
           <span>Nouveau Chat</span>
         </button>
-        <button onClick={() => {}} className="new-chat-button">
+        <button
+          onClick={() => {
+            setView("library");
+          }}
+          className="new-chat-button"
+        >
           <FileStack size={20} />
           <span>Bibliothèque</span>
         </button>
@@ -259,80 +276,8 @@ function App() {
         </div>
       </div>
       <div style={styles.mainContent} ref={containerRef}>
-        {
-          // '{}' pour afficher ou non certaines parties du code
-          conversationId || showFirstMessages ? ( // si au moins une des deux variables est définie on affiche la conversation, sinon la page d'accueil
-            <div>
-              <Conversation
-                conversationTitle={conversationTitle}
-                convLoading={convLoading}
-                messages={messages}
-                loading={loading}
-                conversationId={conversationId}
-              />
-            </div>
-          ) : (
-            <div>
-              <div>
-                <div
-                  style={{
-                    height: "35vh",
-                    display: "flex",
-                    justifyContent: "center",
-                    alignItems: "end",
-                    width: "100%",
-                  }}
-                >
-                  <div
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      height: "60px",
-                      paddingLeft: "10px",
-                    }}
-                  >
-                    <img
-                      src={macaronIcon}
-                      alt="Icône Macaron"
-                      style={{
-                        width: "32px",
-                        height: "32px",
-                        marginRight: "16px",
-                      }}
-                    />
-                    <div
-                      style={{
-                        fontWeight: "500",
-                        fontSize: "20px",
-                        color: "#333",
-                      }}
-                    >
-                      Bonjour, je suis Macaron, l'assistant qui rend vos
-                      assurances plus digestes.
-                    </div>
-                  </div>
-                </div>
-
-                <div
-                  style={{
-                    paddingBottom: "20px",
-                    width: "100%",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    color: "#404040",
-                    fontSize: "13px",
-                    marginTop: "5px",
-                  }}
-                >
-                  Posez-moi vos questions, je suis là pour sucrer vos doutes.
-                </div>
-              </div>
-            </div>
-          )
-        }
-        <div>
-          <DeepseekInput
+        {view === "home" && (
+          <Home
             setNewConversation={setNewConversation}
             newConversation={newConversation}
             newChat={newChat}
@@ -350,7 +295,30 @@ function App() {
             showFirstMessages={showFirstMessages}
             setShowFirstMessages={setShowFirstMessages}
           />
-        </div>
+        )}
+        {view === "library" && <Library contracts={contrats} />}
+        {view === "chat" && (
+          <Chat
+            setNewConversation={setNewConversation}
+            newConversation={newConversation}
+            newChat={newChat}
+            setConversationTitle={setConversationTitle}
+            conversationTitle={conversationTitle}
+            conversationId={conversationId}
+            setConversationId={setConversationId}
+            response={response}
+            setResponse={setResponse}
+            setLoading={setLoading}
+            loading={loading}
+            convLoading={convLoading}
+            setPrompt={setPrompt}
+            prompt={prompt}
+            messages={messages}
+            setMessages={setMessages}
+            showFirstMessages={showFirstMessages}
+            setShowFirstMessages={setShowFirstMessages}
+          />
+        )}
       </div>
     </div>
   );
