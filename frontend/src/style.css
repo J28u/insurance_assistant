@@ -4,8 +4,8 @@
   gap: 8px;
   padding: 8px 16px;
   margin: 18px 0px;
-  background-color: #eef2ff;
-  color: #2563eb;
+  background-color: #ddebdd;
+  color: #355e3b;
   border: none;
   border-radius: 8px;
   cursor: pointer;
@@ -23,7 +23,7 @@
 }
 
 .new-chat-button:hover {
-  background-color: #ced9fd;
+  background-color: #c7dac7;
 }
 
 .custom-input {

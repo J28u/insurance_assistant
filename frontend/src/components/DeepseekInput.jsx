@@ -187,7 +187,7 @@ function DeepseekInput({
           });
         }
       }
-      sendLastTwoMessages("68498366d1cf3572b09f55aa", conversationId, [
+      sendLastTwoMessages("68235ea293d0a7e8eab16d47", conversationId, [
         { role: "user", content: question },
         { role: "assistant", content: answer },
       ]);
@@ -331,16 +331,16 @@ function DeepseekInput({
                     borderRadius: "50%",
                     cursor: "pointer",
                     padding: "7px",
-                    backgroundColor: prompt === "" ? "#9ca3af" : "#4d6bfe",
+                    backgroundColor: prompt === "" ? "#9ca3af" : "#6DA46D",
                   }}
                   onMouseEnter={(e) => {
                     if (prompt !== "") {
-                      e.target.style.backgroundColor = "#0832ff";
+                      e.target.style.backgroundColor = "#5D935D";
                     }
                   }}
                   onMouseLeave={(e) => {
                     if (prompt !== "") {
-                      e.target.style.backgroundColor = "#4d6bfe";
+                      e.target.style.backgroundColor = "#6DA46D";
                     }
                   }}
                 />
@@ -365,7 +365,7 @@ function DeepseekInput({
                       width: "45px",
                       height: "45px",
                       border: "3px solid transparent",
-                      borderTop: "3px solid #3b82f6",
+                      borderTop: "3px solid #6DA46D",
                       borderRadius: "50%",
                       animation: "spin 1s linear infinite", // spinner tourne pendant la requête (autour du bouton)
                     }}
@@ -376,7 +376,7 @@ function DeepseekInput({
                       width: "35px",
                       height: "35px",
                       borderRadius: "50%",
-                      backgroundColor: "#3b82f6",
+                      backgroundColor: "#6DA46D",
                       display: "flex",
                       alignItems: "center",
                       justifyContent: "center",
@@ -386,10 +386,10 @@ function DeepseekInput({
                       position: "relative",
                     }}
                     onMouseEnter={(e) =>
-                      (e.target.style.backgroundColor = "#2563eb")
+                      (e.target.style.backgroundColor = "#5D935D")
                     }
                     onMouseLeave={(e) =>
-                      (e.target.style.backgroundColor = "#3b82f6")
+                      (e.target.style.backgroundColor = "#6DA46D")
                     }
                   >
                     <div // carré blanc au milieu du bouton (pour montrer que c'est un stop)
