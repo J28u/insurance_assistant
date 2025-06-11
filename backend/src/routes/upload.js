@@ -5,7 +5,28 @@ const path = require("path");
 const fs = require("fs");
 
 const router = express.Router();
-const upload = multer({ dest: "uploads/" });
+
+// Dossier de destination
+const uploadDir = path.resolve(
+  __dirname,
+  "../../../kedro_pipelines/data/01_raw"
+);
+if (!fs.existsSync(uploadDir)) {
+  fs.mkdirSync(uploadDir, { recursive: true });
+}
+
+// Configuration du stockage
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, uploadDir); // dossier où enregistrer
+  },
+  filename: function (req, file, cb) {
+    // Sauvegarde avec le nom original (attention aux collisions !)
+    cb(null, file.originalname);
+  },
+});
+
+const upload = multer({ storage: storage });
 
 // Route pour loader les documents pdfs, les découper en chunk et les loader dans le vectorstore
 router.post("/", upload.array("pdfs"), (req, res) => {

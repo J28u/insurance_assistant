@@ -196,7 +196,7 @@ const Conversation = ({
                   }
                   // si role bot, structure la réponse avec du HTML, sinon du texte brute
                   dangerouslySetInnerHTML={
-                    msg.role === "bot"
+                    msg.role === "assistant"
                       ? { __html: DOMPurify.sanitize(decodeHTML(msg.content)) }
                       : undefined
                   }

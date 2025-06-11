@@ -1,4 +1,5 @@
 import logging
+from pathlib import Path
 
 from langchain.prompts import PromptTemplate
 from langchain_community.vectorstores import FAISS
@@ -45,7 +46,7 @@ def format_context(relevant_chunks: list[Document]) -> str:
     """
     context_list = []
     for n, doc in enumerate(relevant_chunks):
-        title = doc.metadata["source"].split("/")[-1].replace(".pdf", "")
+        title = Path(doc.metadata["source"]).stem
         content = doc.page_content
         context_list.append(f"Extrait du document '{title}' :\n{content}")
 
