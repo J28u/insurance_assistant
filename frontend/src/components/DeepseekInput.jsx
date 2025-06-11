@@ -56,7 +56,24 @@ function DeepseekInput({
     }
   };
 
-  const sendLastTwoMessages = async (userId, conversationId, messages) => {
+  // Fonction pour créer un titre propre pour une conversation à partir de la question de l'utilisateur
+  const cleanTitle = (text, maxLength = 30) => {
+    if (!text) return "";
+    if (text.length <= maxLength) return text;
+    let truncated = text.slice(0, maxLength);
+    const lastSpace = truncated.lastIndexOf(" ");
+    if (lastSpace > 0) {
+      truncated = truncated.slice(0, lastSpace);
+    }
+    return truncated + "…";
+  };
+
+  const sendLastTwoMessages = async (
+    userId,
+    conversationId,
+    title,
+    messages
+  ) => {
     try {
       const response = await axios.post(
         "http://localhost:3000/api/conversations",
@@ -64,6 +81,7 @@ function DeepseekInput({
           userId: userId,
           conversationId: conversationId,
           messages: messages,
+          title: title,
         }
       );
       setConversationId(response.data.conversationId);
@@ -102,7 +120,7 @@ function DeepseekInput({
     setAbortController(controller);
     setIsAborted(false);
     const systemPrompt = `
-      Tu es Insurance Pal, un assistant virtuel amical et expert juridique spécialisé dans les assurances de personnes et les assurances de dommages.
+      Tu es Macaron, un assistant virtuel amical et expert juridique spécialisé dans les assurances de personnes et les assurances de dommages.
       Tu t'exprime en français naturel, correct et professionnel. Tu dois éviter les fautes de grammaire et t'adresser à l'utilisateur avec clarté.
       Réponds en HTML structuré avec des balises comme <h2>, <h3>, <p>, et <ul>. Utilise des emojis pour rendre le texte engageant.
 
@@ -128,7 +146,7 @@ function DeepseekInput({
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          model: "hf.co/cognitivecomputations/Dolphin3.0-Llama3.1-8B-GGUF:Q6_K",
+          model: "gemma2:2b",
           messages: [
             {
               role: "system",
@@ -150,7 +168,7 @@ function DeepseekInput({
       setShowFirstMessages(true); // Affiche page avec les messages (pas la page d'accueil)
 
       if (conversationId == undefined) {
-        setConversationTitle(question.slice(0, 30));
+        setConversationTitle(cleanTitle(question));
       }
 
       const reader = res.body.getReader(); // Récupère le chunk
@@ -187,10 +205,15 @@ function DeepseekInput({
           });
         }
       }
-      sendLastTwoMessages("68498366d1cf3572b09f55aa", conversationId, [
-        { role: "user", content: question },
-        { role: "assistant", content: answer },
-      ]);
+      sendLastTwoMessages(
+        "68235ea293d0a7e8eab16d47",
+        conversationId,
+        cleanTitle(question),
+        [
+          { role: "user", content: question },
+          { role: "assistant", content: answer },
+        ]
+      );
       setStop(true);
       const endTime = performance.now(); // fin chrono
       const duration = endTime - startTime;
@@ -227,7 +250,7 @@ function DeepseekInput({
             value={prompt}
             className="custom-input"
             type="text"
-            placeholder="Message Insurance Pal"
+            placeholder="Poser une question"
             // Met à jour la variable prompt si input change
             onChange={(e) => {
               setPrompt(e.target.value);
@@ -265,7 +288,7 @@ function DeepseekInput({
                   strokeWidth=".2"
                 ></path>
               </svg>
-              <span>DeepThink (R1)</span>
+              <span></span>
             </button>
             <button className="left-buttons">
               <svg
@@ -292,7 +315,7 @@ function DeepseekInput({
             </button>
           </div>
           <div style={{ display: "flex", marginLeft: "auto" }}>
-            <div>
+            <div className="tooltip-wrapper">
               <button
                 className="paperclip"
                 onClick={() => fileInputRef.current.click()} // simule un clique sur le champ caché <input type=file>
@@ -310,6 +333,9 @@ function DeepseekInput({
                   ></path>
                 </svg>
               </button>
+              <span className="tooltip-text">
+                Ajouter un contrat d'assurance
+              </span>
               <input
                 type="file"
                 accept="application/pdf"
@@ -331,16 +357,16 @@ function DeepseekInput({
                     borderRadius: "50%",
                     cursor: "pointer",
                     padding: "7px",
-                    backgroundColor: prompt === "" ? "#9ca3af" : "#4d6bfe",
+                    backgroundColor: prompt === "" ? "#9ca3af" : "#6DA46D",
                   }}
                   onMouseEnter={(e) => {
                     if (prompt !== "") {
-                      e.target.style.backgroundColor = "#0832ff";
+                      e.target.style.backgroundColor = "#5D935D";
                     }
                   }}
                   onMouseLeave={(e) => {
                     if (prompt !== "") {
-                      e.target.style.backgroundColor = "#4d6bfe";
+                      e.target.style.backgroundColor = "#6DA46D";
                     }
                   }}
                 />
@@ -365,7 +391,7 @@ function DeepseekInput({
                       width: "45px",
                       height: "45px",
                       border: "3px solid transparent",
-                      borderTop: "3px solid #3b82f6",
+                      borderTop: "3px solid #6DA46D",
                       borderRadius: "50%",
                       animation: "spin 1s linear infinite", // spinner tourne pendant la requête (autour du bouton)
                     }}
@@ -376,7 +402,7 @@ function DeepseekInput({
                       width: "35px",
                       height: "35px",
                       borderRadius: "50%",
-                      backgroundColor: "#3b82f6",
+                      backgroundColor: "#6DA46D",
                       display: "flex",
                       alignItems: "center",
                       justifyContent: "center",
@@ -386,10 +412,10 @@ function DeepseekInput({
                       position: "relative",
                     }}
                     onMouseEnter={(e) =>
-                      (e.target.style.backgroundColor = "#2563eb")
+                      (e.target.style.backgroundColor = "#5D935D")
                     }
                     onMouseLeave={(e) =>
-                      (e.target.style.backgroundColor = "#3b82f6")
+                      (e.target.style.backgroundColor = "#6DA46D")
                     }
                   >
                     <div // carré blanc au milieu du bouton (pour montrer que c'est un stop)
