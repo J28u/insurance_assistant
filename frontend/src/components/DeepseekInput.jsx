@@ -292,7 +292,7 @@ function DeepseekInput({
             </button>
           </div>
           <div style={{ display: "flex", marginLeft: "auto" }}>
-            <div>
+            <div className="tooltip-wrapper">
               <button
                 className="paperclip"
                 onClick={() => fileInputRef.current.click()} // simule un clique sur le champ caché <input type=file>
@@ -310,6 +310,9 @@ function DeepseekInput({
                   ></path>
                 </svg>
               </button>
+              <span className="tooltip-text">
+                Ajouter un contrat d'assurance
+              </span>
               <input
                 type="file"
                 accept="application/pdf"
