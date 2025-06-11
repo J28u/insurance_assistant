@@ -20,8 +20,7 @@ const styles = {
     backgroundColor: "#F5F8F5",
     padding: "10px",
     borderRight: "none",
-    position: "sticky",
-    top: "0",
+    overflowY: "auto",
   },
   mainContent: {
     width: "100vw",
