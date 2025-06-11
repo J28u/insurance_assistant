@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from "react";
 import { MessageSquare } from "lucide-react";
+import { FileStack } from "lucide-react";
 import "./style.css";
 import DeepseekInput from "./components/DeepseekInput.jsx";
 import Conversation from "./components/Conversation.jsx";
@@ -204,6 +205,10 @@ function App() {
         >
           <MessageSquare size={20} />
           <span>Nouveau Chat</span>
+        </button>
+        <button onClick={() => {}} className="new-chat-button">
+          <FileStack size={20} />
+          <span>Bibliothèque</span>
         </button>
 
         <div style={{ height: "70vh" }}>
