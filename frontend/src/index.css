@@ -24,10 +24,13 @@ a:hover {
 
 body {
   margin: 0;
-  display: flex;
-  place-items: center;
-  min-width: 320px;
+  padding: 0;
+  width: 100%;
+  height: 100%;
+  box-sizing: border-box;
   min-height: 100vh;
+  overflow-x: hidden;
+  display: block; /* 🔁 NE PAS centrer le contenu comme tu faisais */
 }
 
 h1 {
@@ -66,3 +69,7 @@ button:focus-visible {
     background-color: #f9f9f9;
   }
 }
+
+/* * { Pour le debug
+  outline: 1px solid red;
+} */
