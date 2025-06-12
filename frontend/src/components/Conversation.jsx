@@ -41,7 +41,7 @@ const styles = {
     height: "64px",
     backgroundColor: "white",
     zIndex: "1000", // barre toujours au-dessus des autres éléments
-    width: "calc(100% - 201px)", // 201 : largeur de la sidebar - 1px (largeur de la brodure de la sidebar)
+    width: "calc(100% - 300px)", // 201 : largeur de la sidebar - 1px (largeur de la brodure de la sidebar)
     WebkitBoxShadow: "0px 34px 26px -20px rgb(255, 255, 255)",
     MozBoxShadow: "0px 34px 26px -20px rgb(255, 255, 255)",
     boxShadow: "0px 34px 26px -20px rgb(255, 255, 255)",
