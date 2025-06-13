@@ -1,6 +1,11 @@
-import { useState, useRef, useEffect } from "react";
-import { MessageSquare } from "lucide-react";
-import { FileStack } from "lucide-react";
+import React, { useState, useRef, useEffect } from "react";
+import {
+  MessageSquare,
+  FileStack,
+  Trash2,
+  Ellipsis,
+  Pencil,
+} from "lucide-react";
 import "./style.css";
 import Home from "./components/Home.jsx";
 import Chat from "./components/Chat.jsx";
@@ -34,17 +39,6 @@ const styles = {
     marginLeft: "5px",
     color: "#2c2c36",
   },
-  chatItem: {
-    // style des conversations historisées
-    padding: "8px",
-    borderRadius: "8px",
-    cursor: "pointer",
-    fontSize: "13px",
-    color: "#1F2937",
-    marginBottom: "4px",
-    fontWeight: "400",
-    lineHeight: "1.5",
-  },
   timeLabel: {
     // style des catégories de conversations (7jours, hier, 30 jours)
     fontSize: "14px",
@@ -75,6 +69,8 @@ function App() {
   const [contrats, setContrats] = useState([
     "CG_habitation_RP_protectrice.pdf",
   ]);
+  const [menuVisibleId, setMenuVisibleId] = useState(null);
+  const menuRefs = useRef({}); // clé = conversation._id, valeur = ref DOM
 
   // ------------------------------------- FONCTIONS -------------------------------------------------------------
 
@@ -151,6 +147,20 @@ function App() {
     setTimeCategories(categories);
   };
 
+  const deleteConversation = async (conversationId) => {
+    // Supprime une conversation et tous les messages associés
+    try {
+      const response = await axios.delete(
+        `http://localhost:3000/api/conversations/conversation/${conversationId}`
+      );
+    } catch (error) {
+      console.error(
+        "Error deleting conversations:",
+        error.response ? error.response.data : error.message
+      );
+    }
+  };
+
   // --------------------------------------------------- HOOKS REACT ------------------------------------------------------------------------------
   // Exécute du code après le premier rendu du composant (récupère les conversations historisées)
   useEffect(() => {
@@ -178,8 +188,32 @@ function App() {
     }
   }, [conversationId, showFirstMessages]);
 
-  // ----------------------------------------------------------------------------------------------------------------------------------
+  // Clic en dehors du menu = fermer
+  useEffect(() => {
+    function handleClickOutside(event) {
+      if (
+        menuVisibleId &&
+        menuRefs.current[menuVisibleId] &&
+        menuRefs.current[menuVisibleId].current && // vérifier que current existe
+        !menuRefs.current[menuVisibleId].current.contains(event.target)
+      ) {
+        setMenuVisibleId(null);
+      }
+    }
 
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [menuVisibleId]);
+
+  // ----------------------------------------------------------------------------------------------------------------------------------
+  // Prépare les refs ici, AVANT le return
+  Object.values(timeCategories).forEach((convs) => {
+    convs.forEach((conversation) => {
+      if (!menuRefs.current[conversation._id]) {
+        menuRefs.current[conversation._id] = React.createRef();
+      }
+    });
+  });
   // -----------------------------------------------AFFICHAGE-----------------------------------
 
   return (
@@ -242,31 +276,53 @@ function App() {
                     ) => (
                       <div
                         key={conversation._id}
-                        style={{
-                          marginRight: "5px",
-                          ...styles.chatItem,
-                          backgroundColor:
-                            conversation._id === conversationId
-                              ? "#DDEBDD"
-                              : "transparent",
-                          transition: "background-color 0.3s", // smooth transition for hover
-                        }}
+                        className={`chat-item ${
+                          conversation._id === conversationId ? "selected" : ""
+                        }`}
                         onClick={() => {
                           setConversationId(conversation._id);
                           setConversationTitle(conversation.title);
                           setNewChat(false); // met à false pour pouvoir récupérer la conversation via le Hook
                         }}
-                        onMouseEnter={(e) =>
-                          (e.target.style.backgroundColor = "#DDEBDD")
-                        }
-                        onMouseLeave={(e) =>
-                          (e.target.style.backgroundColor =
-                            conversation._id === conversationId
-                              ? "#DDEBDD"
-                              : "transparent")
-                        }
                       >
                         {conversation.title}
+                        <button
+                          className="chat-item-button"
+                          onClick={(e) => {
+                            e.stopPropagation(); // cliquer sur le bouton ne change pas la conversation affichée
+                            // Toggle le menu juste pour cette conversation
+                            setMenuVisibleId((prev) =>
+                              prev === conversation._id
+                                ? null
+                                : conversation._id
+                            );
+                          }}
+                        >
+                          <Ellipsis size={15} />
+                        </button>
+                        {menuVisibleId === conversation._id && (
+                          <div
+                            className="menu-container"
+                            ref={menuRefs.current[conversation._id]}
+                          >
+                            <button
+                              onClick={() =>
+                                console.log("Renommer", conversation._id)
+                              }
+                            >
+                              <Pencil size={15} /> Renommer
+                            </button>
+                            <button
+                              style={{ color: "red" }}
+                              onClick={() => {
+                                deleteConversation(conversation._id);
+                                // setNewChat(false);
+                              }}
+                            >
+                              <Trash2 size={15} /> Supprimer
+                            </button>
+                          </div>
+                        )}
                       </div>
                     )
                   )}
