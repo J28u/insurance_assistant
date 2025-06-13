@@ -106,4 +106,32 @@ router.get("/onlyone/:conversationId", async (req, res) => {
   }
 });
 
+// Route supprimer une conversation à partir de son Id:
+router.delete("/conversation/:conversationId", async (req, res) => {
+  try {
+    const { conversationId } = req.params;
+
+    // Vérifier si la conversation existe
+    const conversation = await Conversation.findById(conversationId);
+    if (!conversation) {
+      return res.status(404).json({ error: "Conversation non trouvée" });
+    }
+
+    // Supprime tous les messages liés dans la collection Message
+    await Message.deleteMany({ conversationId: conversation._id });
+
+    // Supprime la conversation
+    await conversation.deleteOne();
+
+    res.status(200).json({
+      message: "Conversation et messages associés supprimés avec succès",
+    });
+  } catch (error) {
+    console.error("Erreur lors de la suppression :", error);
+    return res
+      .status(500)
+      .json({ error: "Erreur serveur lors de la suppression" });
+  }
+});
+
 module.exports = router;
