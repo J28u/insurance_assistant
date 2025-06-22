@@ -6,7 +6,7 @@ Chatbot à déployer en local pour poser des questions sur ses contrats d'assura
 
 Développer une application capable d'assister un utilisateur dans la compréhension de ses contrats d'assurance, à l'aide d'un chatbot intelligent.
 
-## Etat actuel (Livrables semaine 8 projet fil rouge) [🚧 en cours ...]
+## Etat actuel (Livrables semaine 8 projet fil rouge)
 
 Finalisation d'un POC présentable, avec :
 
