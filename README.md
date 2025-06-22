@@ -6,14 +6,14 @@ Chatbot à déployer en local pour poser des questions sur ses contrats d'assura
 
 Développer une application capable d'assister un utilisateur dans la compréhension de ses contrats d'assurance, à l'aide d'un chatbot intelligent.
 
-## Etat actuel (Livrables semaine 7 projet fil rouge)
+## Etat actuel (Livrables semaine 8 projet fil rouge) [🚧 en cours ...]
 
-- ✅ Intégration d'un RAG classique (Dense Retriever)
-- ✅ Stockage de la base vectorielle FAISS en local
-- ✅ Chargement de pdfs via l'interface utilisateur
-- ✅ Endpoint pour l'upload de PDF et la vectorisation automatique
-- ✅ Endpoint pour récupérer un prompt enrichi du contexte pertinent
-- ✅ Séparation claire backend / frontend / pipelines ML
+Finalisation d'un POC présentable, avec :
+
+- ✅ Nouvelle identité visuelle : thème _matcha_ et mascotte "Macaron"
+- ✅ Améliorations UX : tooltip, suppression/renommage de conversations via l'UI
+- ✅ Page "Bibliothèque" pour consulter les contrats indexés
+- ✅ Refonte du prompt et amélioration des métadonnées (PDF, rôles assistant/bot)
 
 ## 📁 Structure du projet
 
@@ -26,7 +26,9 @@ Développer une application capable d'assister un utilisateur dans la compréhen
 │       │   ├── Message.js
 │       │   └── User.js
 │       ├── routes/                 # Routes Express pour l'API REST
-│       │   └── conversations.js    # Routes pour la gestion des conversations
+│       │   ├── conversations.js    # Routes pour la gestion des conversations
+│       │   ├── retriever.js        # Routes pour la récupération de documents pertinents et du prompt enrichi.
+│       │   └── upload.js           # Routes pour le chargement des documents pdfs
 │       └── index.js                # Point d'entrée backend : connexion DB et configuration des routes
 │
 ├── frontend/                       # Frontend React (Vite)
@@ -34,8 +36,11 @@ Développer une application capable d'assister un utilisateur dans la compréhen
 │   └── src/
 │       ├── assets/                 # Images, polices, etc.
 │       ├── components/             # Composants React réutilisables
+│       │   ├── Chat.jsx
 │       │   ├── Conversation.jsx
-│       │   └── DeepseekInput.jsx
+│       │   ├── DeepseekInput.jsx
+│       │   ├── Home.jsx
+│       │   └── Library.jsx
 │       ├── App.jsx                 # Composant racine de l'application
 │       ├── index.css               # Styles globaux
 │       ├── main.jsx                # Point d'entrée principal React
