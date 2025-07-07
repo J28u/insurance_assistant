@@ -15,6 +15,14 @@ Finalisation d'un POC présentable, avec :
 - ✅ Page "Bibliothèque" pour consulter les contrats indexés
 - ✅ Refonte du prompt et amélioration des métadonnées (PDF, rôles assistant/bot)
 
+## Suivis des changements entre les livrables
+
+| Semaine | Tag       | Description                                        | Historique GitHub                                                                     |
+| ------- | --------- | -------------------------------------------------- | ------------------------------------------------------------------------------------- |
+| 6       | `week-06` | Mise en place de la structure fullstack du chatbot | [Voir commits](https://github.com/J28u/insurance_assistant/compare/204a969...week-06) |
+| 7       | `week-07` | Intégration d’un RAG classique                     | [Voir commits](https://github.com/J28u/insurance_assistant/compare/week-06...week-07) |
+| 8       | `week-08` | Finalisation d'un POC présentable                  | [Voir commits](https://github.com/J28u/insurance_assistant/compare/week-07...week-08) |
+
 ## 📁 Structure du projet
 
 ```
