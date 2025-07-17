@@ -1,1 +1,5 @@
-Voici les éléments de contexte, issus de mon contrat d'assurance, à utiliser :\n---\n{context}\n---\nMa question est : {question}
+Contexte :
+{context}
+\n
+Question :
+{question}
