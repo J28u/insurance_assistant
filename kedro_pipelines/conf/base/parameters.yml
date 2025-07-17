@@ -6,8 +6,8 @@ separators: ["\n\n", "\n"]
 pdf_paths: ["data/01_raw/CG_habitation_RP_protectrice.pdf"]
 
 ############ CLASSIC RAG PIPELINE ############
-top_k_retriever: 3
+top_k_retriever: 1
 retriever_config:
   search_type: "similarity"
   search_kwargs:
-    k: 3
+    k: 1

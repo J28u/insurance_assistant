@@ -1,6 +1,6 @@
-# 🤓☂️ Personal Insurance Chatbot — Fullstack JS (Vite + Express + MongoDB)
+# Personal Insurance Chatbot — Fullstack JS (Vite + Express + MongoDB)
 
-Chatbot à déployer en local pour poser des questions sur ses contrats d'assurance sans envoyer ses infos persos à OpenAi.
+Chatbot à déployer en local pour poser des questions sur ses contrats d'assurance sans envoyer ses infos persos à OpenAI.
 
 ## But du projet
 
@@ -96,7 +96,7 @@ Finalisation d'un POC présentable, avec :
 └── README.md                       # Documentation principale du projet
 ```
 
-## 🚀 Installation [partie en construction 🚧]
+## 🚀 Installation
 
 ### Prérequis
 
