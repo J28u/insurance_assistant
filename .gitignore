@@ -557,3 +557,7 @@ venv.bak/
 
 # mlflow local runs
 mlruns/*
+
+
+# Firebase Admin credentials (clé privée)
+**/serviceAccountKey.json

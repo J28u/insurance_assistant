@@ -4,6 +4,8 @@ import DeepseekInput from "./DeepseekInput.jsx";
 import macaronIcon from "../assets/macaron.png";
 
 function Home({
+  firebaseUser,
+  handleLogout,
   setNewConversation,
   newConversation,
   newChat,
@@ -22,7 +24,11 @@ function Home({
   setShowFirstMessages,
 }) {
   return (
-    <div>
+    <div style={{ position: "relative", minHeight: "100vh", padding: "20px" }}>
+      {/* Bouton déconnexion en haut à droite */}
+      <button className="logout-button" onClick={handleLogout}>
+        Déconnexion
+      </button>
       <div>
         <div>
           <div
@@ -83,6 +89,7 @@ function Home({
 
       <div>
         <DeepseekInput
+          firebaseUser={firebaseUser}
           setNewConversation={setNewConversation}
           newConversation={newConversation}
           newChat={newChat}

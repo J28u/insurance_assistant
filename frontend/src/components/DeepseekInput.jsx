@@ -7,6 +7,7 @@ import { ArrowUp } from "lucide-react";
 import axios from "axios";
 
 function DeepseekInput({
+  firebaseUser,
   setNewConversation,
   newConversation,
   newChat,
@@ -69,19 +70,24 @@ function DeepseekInput({
   };
 
   const sendLastTwoMessages = async (
-    userId,
+    firebaseUser,
     conversationId,
     title,
     messages
   ) => {
     try {
+      const token = await firebaseUser.getIdToken();
       const response = await axios.post(
         "http://localhost:3000/api/conversations",
         {
-          userId: userId,
           conversationId: conversationId,
           messages: messages,
           title: title,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
         }
       );
       setConversationId(response.data.conversationId);
@@ -198,15 +204,10 @@ function DeepseekInput({
           });
         }
       }
-      sendLastTwoMessages(
-        "68235ea293d0a7e8eab16d47",
-        conversationId,
-        cleanTitle(question),
-        [
-          { role: "user", content: question },
-          { role: "assistant", content: answer },
-        ]
-      );
+      sendLastTwoMessages(firebaseUser, conversationId, cleanTitle(question), [
+        { role: "user", content: question },
+        { role: "assistant", content: answer },
+      ]);
       setStop(true);
       const endTime = performance.now(); // fin chrono
       const duration = endTime - startTime;

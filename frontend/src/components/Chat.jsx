@@ -5,6 +5,7 @@ import DeepseekInput from "./DeepseekInput.jsx";
 import Conversation from "./Conversation.jsx";
 
 function Chat({
+  firebaseUser,
   setNewConversation,
   newConversation,
   newChat,
@@ -37,6 +38,7 @@ function Chat({
       </div>
       <div>
         <DeepseekInput
+          firebaseUser={firebaseUser}
           setNewConversation={setNewConversation}
           newConversation={newConversation}
           newChat={newChat}
