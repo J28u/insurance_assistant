@@ -1,8 +1,10 @@
 const express = require("express");
 const { spawn } = require("child_process");
 const path = require("path");
+const verifyFirebaseToken = require("../middlewares/verifyFirebaseToken");
 
 const router = express.Router();
+router.use(verifyFirebaseToken);
 
 router.get("/prompt_with_context/:question", async (req, res) => {
   try {

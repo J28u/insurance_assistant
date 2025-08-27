@@ -1,3 +1,4 @@
+const verifyFirebaseToken = require("../middlewares/verifyFirebaseToken");
 const express = require("express");
 const multer = require("multer");
 const { spawn } = require("child_process");
@@ -5,6 +6,7 @@ const path = require("path");
 const fs = require("fs");
 
 const router = express.Router();
+router.use(verifyFirebaseToken);
 
 // Dossier de destination
 const uploadDir = path.resolve(
