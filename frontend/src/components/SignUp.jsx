@@ -1,25 +1,47 @@
 import React, { useState } from "react";
-import { getAuth, signInWithEmailAndPassword } from "firebase/auth";
+import { getAuth, createUserWithEmailAndPassword } from "firebase/auth";
 import app from "../firebase";
 import macaronIcon from "../assets/macaron.png";
 import "../style.css";
+import axios from "axios";
 
-function SignIn({ onLoginSuccess, switchToSignUp }) {
+function SignUp({ onLoginSuccess, switchToSignIn }) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
 
-  const handleLogin = async (e) => {
+  const createUser = async (firebaseUser) => {
+    try {
+      const token = await firebaseUser.getIdToken();
+      const response = await axios.post(
+        "http://localhost:3000/api/users",
+        {},
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      console.log(response.data);
+    } catch (error) {
+      console.error(
+        "Error adding new user in database:",
+        error.response?.data || error.message
+      );
+    }
+  };
+
+  const handleSubmit = async (e) => {
     e.preventDefault(); // empêche le rechargement de la page lors du submit.
     const auth = getAuth(app); // récupère le service Authentification lié au projet Firebase (SDK client)
     try {
-      const userCredential = await signInWithEmailAndPassword(
-        // Renvoie une Promise Firebase qui vérifie les identifiants auprès de Firebase Auth
+      const userCredential = await createUserWithEmailAndPassword(
         auth,
         email,
         password
       );
-      onLoginSuccess(userCredential.user); // on passe l'objet complet
+      createUser(userCredential.user);
+      onLoginSuccess(userCredential.user);
     } catch (err) {
       setError(err.message);
     }
@@ -78,7 +100,7 @@ function SignIn({ onLoginSuccess, switchToSignUp }) {
         </p>
       </div>
 
-      <form className="signup-form" onSubmit={handleLogin}>
+      <form className="signup-form" onSubmit={handleSubmit}>
         <input
           type="email"
           placeholder="Email"
@@ -93,15 +115,15 @@ function SignIn({ onLoginSuccess, switchToSignUp }) {
           required
           onChange={(e) => setPassword(e.target.value)}
         />
-        <button type="submit">Se connecter</button>
+        <button type="submit">S'inscrire</button>
         <p className="signup-switch">
-          Pas de compte ?{" "}
+          Déjà un compte ?{"  "}
           <button
             type="button"
             className="secondary-button"
-            onClick={switchToSignUp}
+            onClick={switchToSignIn}
           >
-            S'inscrire
+            Se connecter
           </button>
         </p>
         {error && <div className="error-message">{error}</div>}
@@ -110,4 +132,4 @@ function SignIn({ onLoginSuccess, switchToSignUp }) {
   );
 }
 
-export default SignIn;
+export default SignUp;

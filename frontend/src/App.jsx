@@ -12,7 +12,8 @@ import "./style.css";
 import Home from "./components/Home.jsx";
 import Chat from "./components/Chat.jsx";
 import Library from "./components/Library.jsx";
-import SignUp from "./components/SignUp";
+import SignIn from "./components/SignIn.jsx";
+import SignUp from "./components/SignUp.jsx";
 import axios from "axios";
 
 // ------------------------------------STYLE----------------------------------------------------
@@ -75,6 +76,7 @@ function App() {
   const [menuVisibleId, setMenuVisibleId] = useState(null);
   const menuRefs = useRef({}); // clé = conversation._id, valeur = ref DOM
   const [firebaseUser, setfirebaseUser] = useState(null);
+  const [showSignIn, setShowSignIn] = useState(true);
 
   // ------------------------------------- FONCTIONS -------------------------------------------------------------
 
@@ -150,7 +152,7 @@ function App() {
         categories.Yesterday.push(conversation);
       } else if (diffDays > 1 && diffDays <= 7) {
         categories["Last 7 Days"].push(conversation);
-      } else if (diffDays > 7 && diffDays <= 30) {
+      } else if (diffDays > 7 && diffDays <= 90) {
         categories["Last 30 Days"].push(conversation);
       }
     });
@@ -216,6 +218,7 @@ function App() {
   // Ecoute si utilisateur connecté -> récupère les conversations historisées)
   useEffect(() => {
     if (firebaseUser) {
+      setTimeCategories([]);
       getUserConversations(firebaseUser);
     }
   }, [firebaseUser, newConversation]);
@@ -272,7 +275,17 @@ function App() {
   return (
     <>
       {!firebaseUser ? (
-        <SignUp onLoginSuccess={(user) => setfirebaseUser(user)} />
+        showSignIn ? (
+          <SignIn
+            onLoginSuccess={(user) => setFirebaseUser(user)}
+            switchToSignUp={() => setShowSignIn(false)}
+          />
+        ) : (
+          <SignUp
+            onLoginSuccess={(user) => setFirebaseUser(user)}
+            switchToSignIn={() => setShowSignIn(true)}
+          />
+        )
       ) : (
         <div style={styles.container}>
           <div style={styles.sideBar}>
