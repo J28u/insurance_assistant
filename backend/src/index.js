@@ -13,6 +13,7 @@ app.use(cors()); // pour que notre API accepte les requêtes à partir de toutes
 const conversationRoutes = require("./routes/conversations");
 const uploadRoutes = require("./routes/upload");
 const retrieverRoutes = require("./routes/retriever");
+const userRoutes = require("./routes/users");
 
 // Connection à MongoDB
 async function main() {
@@ -29,6 +30,7 @@ main().catch((err) => console.log(err)); // exécute la fonction main et catch l
 app.use("/api/conversations", conversationRoutes); // Quand quelqu'un fait une requête sur /api/conversations on lui retourne ce qu'il y a dans conversationRoutes
 app.use("/api/upload", uploadRoutes);
 app.use("/api/retriever", retrieverRoutes);
+app.use("/api/users", userRoutes);
 
 app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}`);
