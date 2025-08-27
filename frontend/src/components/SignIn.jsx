@@ -4,16 +4,17 @@ import app from "../firebase";
 import macaronIcon from "../assets/macaron.png";
 import "../style.css";
 
-function SignUp({ onLoginSuccess }) {
+function SignIn({ onLoginSuccess }) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
 
   const handleLogin = async (e) => {
-    e.preventDefault();
-    const auth = getAuth(app);
+    e.preventDefault(); // empêche le rechargement de la page lors du submit.
+    const auth = getAuth(app); // récupère le service Authentification lié au projet Firebase (SDK client)
     try {
       const userCredential = await signInWithEmailAndPassword(
+        // Renvoie une Promise Firebase qui vérifie les identifiants auprès de Firebase Auth
         auth,
         email,
         password
@@ -99,4 +100,4 @@ function SignUp({ onLoginSuccess }) {
   );
 }
 
-export default SignUp;
+export default SignIn;
