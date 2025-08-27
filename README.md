@@ -6,14 +6,14 @@ Chatbot à déployer en local pour poser des questions sur ses contrats d'assura
 
 Développer une application capable d'assister un utilisateur dans la compréhension de ses contrats d'assurance, à l'aide d'un chatbot intelligent.
 
-## Etat actuel (Livrables semaine 8 projet fil rouge)
+## Etat actuel (Livrables semaine 11 projet fil rouge)
 
-Finalisation d'un POC présentable, avec :
+Sécurisation de l'app :
 
-- ✅ Nouvelle identité visuelle : thème _matcha_ et mascotte "Macaron"
-- ✅ Améliorations UX : tooltip, suppression/renommage de conversations via l'UI
-- ✅ Page "Bibliothèque" pour consulter les contrats indexés
-- ✅ Refonte du prompt et amélioration des métadonnées (PDF, rôles assistant/bot)
+- ✅ Pages d'authentification Firebase (SignIn/SignUp).
+- ✅ Middleware de vérification du token Firebase sur toutes les routes du backend.
+- ✅ Contrôle d’accès : le backend vérifie que l’utilisateur accède ou modifie uniquement ses propres données (ex: conversations liées à son compte).
+- ✅
 
 ## Suivis des changements entre les livrables
 
@@ -22,6 +22,7 @@ Finalisation d'un POC présentable, avec :
 | 6       | `week-06` | Mise en place de la structure fullstack du chatbot | [Voir commits](https://github.com/J28u/insurance_assistant/compare/204a969...week-06) |
 | 7       | `week-07` | Intégration d’un RAG classique                     | [Voir commits](https://github.com/J28u/insurance_assistant/compare/week-06...week-07) |
 | 8       | `week-08` | Finalisation d'un POC présentable                  | [Voir commits](https://github.com/J28u/insurance_assistant/compare/week-07...week-08) |
+| 11      | `week-11` | Sécurisation de l'app                              | [Voir commits](https://github.com/J28u/insurance_assistant/compare/week-08...week-11) |
 
 ## 📁 Structure du projet
 
@@ -35,6 +36,7 @@ Finalisation d'un POC présentable, avec :
 │       │   └── User.js
 │       ├── routes/                 # Routes Express pour l'API REST
 │       │   ├── conversations.js    # Routes pour la gestion des conversations
+│       │   ├── users.js            # Routes pour la gestion des utilisateurs
 │       │   ├── retriever.js        # Routes pour la récupération de documents pertinents et du prompt enrichi.
 │       │   └── upload.js           # Routes pour le chargement des documents pdfs
 │       └── index.js                # Point d'entrée backend : connexion DB et configuration des routes
@@ -48,7 +50,9 @@ Finalisation d'un POC présentable, avec :
 │       │   ├── Conversation.jsx
 │       │   ├── DeepseekInput.jsx
 │       │   ├── Home.jsx
-│       │   └── Library.jsx
+│       │   ├── Library.jsx
+│       │   ├── SignIn.jsx
+│       │   └── SignUp.jsx
 │       ├── App.jsx                 # Composant racine de l'application
 │       ├── index.css               # Styles globaux
 │       ├── main.jsx                # Point d'entrée principal React
