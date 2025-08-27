@@ -196,21 +196,24 @@ function App() {
   };
 
   // --------------------------------------------------- HOOKS REACT ------------------------------------------------------------------------------
-  // Dès que user change, regarde s'il est connecté ou pas, pour rediriger vers le formulaire de login
+  // S'exécutent une seule fois au chargement du composant App pour installer des "écouteurs" permanents
+
+  // Écoute les changements d’état d’authentification de Firebase (utilisateur se connecte, se déconnecte, session expire/invalidée, session persistée, refresh du token) :
   useEffect(() => {
-    const auth = getAuth(app);
+    const auth = getAuth(app); // récupère l'instance d'authentification Firebase liée à l'app Firebase
+    // Chaque fois que l’état de l’authentification de Firebase change, cette fonction de callback est appelée.
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       if (user) {
-        setfirebaseUser(user); // on stocke tout l'objet user, pas juste l'uid
+        setfirebaseUser(user); // Si l'utilisateur est connecté, on le stocke dans l'état React
       } else {
-        setfirebaseUser(null);
+        setfirebaseUser(null); // Si non le met à null
       }
     });
 
-    return () => unsubscribe();
+    return () => unsubscribe(); // Lors du démontage du composant, on arrête l'écoute des changements d'authentification avec la fonction unsubscribe.
   }, []);
 
-  // Exécute du code après le premier rendu du composant (récupère les conversations historisées)
+  // Ecoute si utilisateur connecté -> récupère les conversations historisées)
   useEffect(() => {
     if (firebaseUser) {
       getUserConversations(firebaseUser);
