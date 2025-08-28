@@ -37,7 +37,7 @@ const styles = {
     overflowY: "auto",
     height: "100vh",
   },
-  deepseekLogo: {
+  appLogo: {
     width: "125px",
     marginTop: "15px",
     marginLeft: "5px",
@@ -289,7 +289,7 @@ function App() {
       ) : (
         <div style={styles.container}>
           <div style={styles.sideBar}>
-            <div style={styles.deepseekLogo}>
+            <div style={styles.appLogo}>
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 width="116.55"

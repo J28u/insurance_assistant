@@ -1,7 +1,7 @@
 import React from "react";
 
 import "../style.css";
-import DeepseekInput from "./DeepseekInput.jsx";
+import LLMInput from "./LLMInput.jsx";
 import Conversation from "./Conversation.jsx";
 
 function Chat({
@@ -37,7 +37,7 @@ function Chat({
         />
       </div>
       <div>
-        <DeepseekInput
+        <LLMInput
           firebaseUser={firebaseUser}
           setNewConversation={setNewConversation}
           newConversation={newConversation}

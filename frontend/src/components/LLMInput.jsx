@@ -6,7 +6,7 @@ import "../style.css";
 import { ArrowUp } from "lucide-react";
 import axios from "axios";
 
-function DeepseekInput({
+function LLMInput({
   firebaseUser,
   setNewConversation,
   newConversation,
@@ -432,4 +432,4 @@ function DeepseekInput({
   );
 }
 
-export default DeepseekInput;
+export default LLMInput;

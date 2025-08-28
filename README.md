@@ -48,7 +48,7 @@ Sécurisation de l'app :
 │       ├── components/             # Composants React réutilisables
 │       │   ├── Chat.jsx
 │       │   ├── Conversation.jsx
-│       │   ├── DeepseekInput.jsx
+│       │   ├── LLMInput.jsx
 │       │   ├── Home.jsx
 │       │   ├── Library.jsx
 │       │   ├── SignIn.jsx
@@ -139,7 +139,7 @@ pip install -r requirements.txt
 ollama pull hf.co/cognitivecomputations/Dolphin3.0-Llama3.1-8B-GGUF:Q6_K
 ```
 
-- renseigner le nom du modèle dans le frontend (DeepseekInput ligne 79)
+- renseigner le nom du modèle dans le frontend (LLMInput ligne 79)
 
 ```
  model: "hf.co/cognitivecomputations/Dolphin3.0-Llama3.1-8B-GGUF:Q6_K"
@@ -233,7 +233,7 @@ Pour plus d'options, veuillez consulter la documentation [Kedro](https://docs.ke
 
 ## 🧩 Composants React
 
-- DeepseekInput.jsx : champ de message + boutons pour interagir avec le LLM
+- LLMInput.jsx : champ de message + boutons pour interagir avec le LLM
 - Conversation.jsx : affichage de la conversation (titre, messages utilisateur et LLM)
 - App.jsx : assemble l’interface
 

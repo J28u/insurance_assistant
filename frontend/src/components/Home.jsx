@@ -1,6 +1,6 @@
 import React from "react";
 import "../style.css";
-import DeepseekInput from "./DeepseekInput.jsx";
+import LLMInput from "./LLMInput.jsx";
 import macaronIcon from "../assets/macaron.png";
 
 function Home({
@@ -88,7 +88,7 @@ function Home({
       </div>
 
       <div>
-        <DeepseekInput
+        <LLMInput
           firebaseUser={firebaseUser}
           setNewConversation={setNewConversation}
           newConversation={newConversation}
