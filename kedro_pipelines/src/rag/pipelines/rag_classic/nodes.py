@@ -46,7 +46,7 @@ def format_context(relevant_chunks: list[Document]) -> str:
     """
     context_list = []
     for n, doc in enumerate(relevant_chunks):
-        title = Path(doc.metadata["source"]).stem
+        title = Path(doc.metadata["original_filename"]).stem
         content = doc.page_content
         context_list.append(f"Extrait du document '{title}' :\n{content}")
 

@@ -26,8 +26,28 @@ def count_tokens_with_tokenizer(text: str, tokenizer: AutoTokenizer) -> int:
     return len(tokenizer.encode(text))
 
 
+def add_original_filename(
+    chunks: list[Document], pdf_metadata_map: dict[str, str], file_path: str
+) -> None:
+    """Adds the original filename of a PDF to the metadata of each chunk.
+
+    Args:
+        chunks (list[Document]): List of LangChain Document chunks for a single PDF.
+        pdf_metadata_map (dict[str, str]): Mapping from PDF file path to original filename.
+        file_path (str): Path of the PDF file whose chunks are being processed.
+    """
+    filename = pdf_metadata_map.get(file_path)
+    if not filename:
+        filename = "unknown"
+        LOGGER.warning(f"No original filename found for {file_path}")
+    for chunk in chunks:
+        chunk.metadata["original_filename"] = filename
+    LOGGER.info(f"Added original_filename '{filename}' to {len(chunks)} chunks")
+
+
 def split_pdfs_into_chunks(
     pdf_paths: list[str],
+    pdf_metadata_map: dict[str, str],
     embedding_model_name: str,
     chunk_size: int,
     chunk_overlap: int,
@@ -39,6 +59,7 @@ def split_pdfs_into_chunks(
 
     Args:
         pdf_paths (list[str]): List of PDF file paths to process.
+        pdf_metadata_map (dict[str, str]): Mapping from PDF file path to original filename.
         embedding_model_name (str): Path or name of the pre-trained model to use for tokenization.
         chunk_size (int): Maximum size of each chunk (in tokens).
         chunk_overlap (int): Number of overlapping tokens between consecutive chunks.
@@ -61,7 +82,9 @@ def split_pdfs_into_chunks(
     for i in tqdm(range(len(pdf_paths)), desc="Parsing pdf files ...", unit="files"):
         loader = PyMuPDFLoader(pdf_paths[i])
         pdf_pages_list = loader.load()
-        all_docs_chunks.extend(text_splitter.split_documents(pdf_pages_list))
+        chunks = text_splitter.split_documents(pdf_pages_list)
+        add_original_filename(chunks, pdf_metadata_map, pdf_paths[i])
+        all_docs_chunks.extend(chunks)
 
     return all_docs_chunks
 
