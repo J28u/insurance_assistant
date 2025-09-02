@@ -1,40 +1,65 @@
+/**
+ * Conversation routes (MongoDB)
+ * - Création de conversation
+ * - Liste des conversations utilisateur
+ * - Récupération d'une conversation avec ses messages
+ * - Suppression d'une conversation
+ */
+
+const express = require("express");
 const verifyFirebaseToken = require("../middlewares/verifyFirebaseToken");
-const User = require("../models/User");
+const NotFoundError = require("../errors/NotFoundError");
+const { createUserRateLimiter } = require("../utils/rateLimiter");
+const {
+  validateUser,
+  validateConversation,
+  validateConversationBelongsToUser,
+} = require("../utils/validation/mongoValidation");
 const Message = require("../models/Message");
 const Conversation = require("../models/Conversation");
-const express = require("express");
 
 const router = express.Router();
 router.use(verifyFirebaseToken);
 
-// Route pour créer une nouvelle conversation dans MongoDB
-router.post("/", async (req, res) => {
+// --- Rate limiters --- //
+const convCreateRateLimiter = createUserRateLimiter(
+  Number(process.env.RATE_LIMIT_CONV_CREATE_WINDOW),
+  Number(process.env.RATE_LIMIT_CONV_CREATE_MAX)
+);
+
+const convListRateLimiter = createUserRateLimiter(
+  Number(process.env.RATE_LIMIT_CONV_LIST_WINDOW),
+  Number(process.env.RATE_LIMIT_CONV_LIST_MAX)
+);
+const convDeleteRateLimiter = createUserRateLimiter(
+  Number(process.env.RATE_LIMIT_CONV_DELETE_WINDOW),
+  Number(process.env.RATE_LIMIT_CONV_DELETE_MAX)
+);
+
+/**
+ * POST /
+ * Crée une nouvelle conversation MongoDB avec ses premiers messages.
+ */
+router.post("/", convCreateRateLimiter, async (req, res, next) => {
   try {
-    const firebaseUid = req.firebaseUser.uid; // récupéré du middleware
+    const firebaseUid = req.firebaseUser.uid;
     const { conversationId, messages, title } = req.body;
 
-    // Vérifier si l'utilisateur existe
-    const userExists = await User.findOne({ firebaseUid: firebaseUid });
-    if (!userExists) {
-      return res.status(404).json({ error: "Utilisateur non trouvé" });
-    }
-    const userId = userExists._id;
+    const user = await validateUser(firebaseUid);
+    const userId = user._id;
 
     let conversation = await Conversation.findById(conversationId);
+
     if (!conversation) {
-      // Vérifier que le message n'est pas vide avant d'accéder à messages[0]
       if (!messages || messages.length === 0) {
-        return res.status(400).json({ error: "Aucun message fourni" });
+        throw new NotFoundError("No input message");
       }
 
-      // Créer la conversation
       conversation = new Conversation({ userId, title });
 
-      await conversation.save(); // Sauvegarder la conversation dans la base de données
+      await conversation.save();
     }
-    console.log(req.body); // au cas où besoin de débuguer
 
-    // Créer les messages :
     const messageDocs = await Message.insertMany(
       messages.map((msg) => ({
         conversationId: conversation._id,
@@ -43,120 +68,99 @@ router.post("/", async (req, res) => {
       }))
     );
 
-    // Ajouter les IDs des messages à la conversation
-    conversation.messages.push(...messageDocs.map((msg) => msg._id)); // Mise à jour, ajoute les Ids des nouveaux messages (conserve les anciens d'où les ...)
-    console.log(conversation.messages);
-
-    // Sauvegarde la conversation mise à jour
+    // Mise à jour de la conversation : ajoute les IDs des nouveaux messages à la conversation (conserve les anciens d'où les '...')
+    conversation.messages.push(...messageDocs.map((msg) => msg._id));
     await conversation.save();
 
     return res.status(201).json({
-      message: "Conversation créee avec succès",
+      message: "Conversation successfully created",
       conversationId: conversation._id,
     });
   } catch (error) {
     console.error(error);
-    return res.status(500).json({ error: "Erreur serveur" });
+    next(error);
   }
 });
 
-// Route pour récupérer les conversations d'un utilisateur dans MongoDB:
-router.get("/user", async (req, res) => {
+/**
+ * GET /user
+ * Récupère toutes les conversations d’un utilisateur.
+ */
+router.get("/user", convListRateLimiter, async (req, res, next) => {
   try {
     const firebaseUid = req.firebaseUser.uid;
+    const user = await validateUser(firebaseUid);
 
-    //Vérifier si l'utilisateur existe
-    const userExists = await User.findOne({ firebaseUid: firebaseUid });
-    if (!userExists) {
-      return res.status(404).json({ error: "Utilisateur non trouvé" });
-    }
-    const userId = userExists._id;
-
-    // Trouver toutes les conversations associées à l'utilisateur
-    const conversations = await Conversation.find({ userId });
+    const conversations = await Conversation.find({ userId: user._id });
     return res.status(200).json({
-      message: "Conversations récupérées",
+      message: "Conversations retrieved",
       conversations,
     });
   } catch (error) {
     console.error(error);
-    return res.status(500).json({ error: "Erreur serveur" });
+    next(error);
   }
 });
 
-//Route pour récupérer les messages d'une conversation
-router.get("/onlyone/:conversationId", async (req, res) => {
-  try {
-    const { conversationId } = req.params;
-    const firebaseUid = req.firebaseUser.uid;
+/**
+ * GET /onlyone/:conversationId
+ * Récupère une conversation spécifique avec ses messages.
+ */
+router.get(
+  "/onlyone/:conversationId",
+  convListRateLimiter,
+  async (req, res, next) => {
+    try {
+      const { conversationId } = req.params;
+      const firebaseUid = req.firebaseUser.uid;
 
-    // Vérifie que l'utilisateur connecté existe :
-    const user = await User.findOne({ firebaseUid });
-    if (!user) return res.status(404).json({ error: "Utilisateur non trouvé" });
+      const user = await validateUser(firebaseUid);
+      const conversation = await validateConversation(conversationId);
+      await validateConversationBelongsToUser(conversation, user._id);
 
-    // Vérifier si la conversation existe
-    const convExists = await Conversation.findById(conversationId);
-    if (!convExists) {
-      return res.status(404).json({ error: "Conversation non trouvée" });
+      // populate remplace les IDs des messages dans le champs messages par les documents complets
+      const conversation_with_messages = await conversation.populate(
+        "messages"
+      );
+
+      return res.status(200).json({
+        message: "Conversation retrieved",
+        conversation_with_messages,
+      });
+    } catch (error) {
+      console.error(error);
+      next(error);
     }
-
-    // Vérifier que la conversation appartient à l'utilisateur connecté
-    if (!convExists.userId.equals(user._id)) {
-      return res.status(403).json({ error: "Accès refusé" });
-    }
-
-    // Grâce à .populate("messages"), Mongoose remplace les IDs des messages dans le champ messages par les documents complets correspondants de la collection messages.
-    const conversation = await Conversation.findById(conversationId).populate(
-      "messages"
-    );
-
-    return res.status(200).json({
-      // renvoie la conversation dans un objet json
-      message: "Conversation récupérée",
-      conversation,
-    });
-  } catch (error) {
-    console.error(error);
-    return res.status(500).json({ error: "Erreur serveur" });
   }
-});
+);
 
-// Route supprimer une conversation à partir de son Id:
-router.delete("/conversation/:conversationId", async (req, res) => {
-  try {
-    const { conversationId } = req.params;
-    const firebaseUid = req.firebaseUser.uid;
+/**
+ * DELETE /conversation/:conversationId
+ * Supprime une conversation et ses messages associés.
+ */
+router.delete(
+  "/conversation/:conversationId",
+  convDeleteRateLimiter,
+  async (req, res, next) => {
+    try {
+      const { conversationId } = req.params;
+      const firebaseUid = req.firebaseUser.uid;
 
-    // Vérifie si l'utilisateur existe (pour éviter qu'un utilisateur supprime une conversation qui ne lui appartient pas)
-    const user = await User.findOne({ firebaseUid });
-    if (!user) return res.status(404).json({ error: "Utilisateur non trouvé" });
+      const user = await validateUser(firebaseUid);
+      const conversation = await validateConversation(conversationId);
+      await validateConversationBelongsToUser(conversation, user._id);
 
-    // Vérifier si la conversation existe
-    const conversation = await Conversation.findById(conversationId);
-    if (!conversation) {
-      return res.status(404).json({ error: "Conversation non trouvée" });
+      await Message.deleteMany({ conversationId: conversation._id }); // Supprime tous les messages liés dans la collection Message
+      await conversation.deleteOne();
+
+      res.status(200).json({
+        message: "Conversation successfully deleted",
+      });
+    } catch (error) {
+      console.error(error);
+      next(error);
     }
-
-    // Vérifier que la conversation appartient à l'utilisateur connecté
-    if (!conversation.userId.equals(user._id)) {
-      return res.status(403).json({ error: "Accès refusé" });
-    }
-
-    // Supprime tous les messages liés dans la collection Message
-    await Message.deleteMany({ conversationId: conversation._id });
-
-    // Supprime la conversation
-    await conversation.deleteOne();
-
-    res.status(200).json({
-      message: "Conversation et messages associés supprimés avec succès",
-    });
-  } catch (error) {
-    console.error("Erreur lors de la suppression :", error);
-    return res
-      .status(500)
-      .json({ error: "Erreur serveur lors de la suppression" });
   }
-});
+);
 
 module.exports = router;

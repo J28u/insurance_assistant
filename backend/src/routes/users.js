@@ -1,34 +1,47 @@
-const verifyFirebaseToken = require("../middlewares/verifyFirebaseToken");
-const User = require("../models/User");
+/**
+ * User routes (MongoDB)
+ * - Création d'utilisateur
+ */
+
 const express = require("express");
+const verifyFirebaseToken = require("../middlewares/verifyFirebaseToken");
+const { createUserRateLimiter } = require("../utils/rateLimiter");
+const ConflictError = require("../errors/ConflictError");
+const User = require("../models/User");
 
 const router = express.Router();
 router.use(verifyFirebaseToken);
 
-// Route pour créer un nouveau user dans MongoDB
-router.post("/", async (req, res) => {
+// --- Rate limiter --- //
+const rateLimiter = createUserRateLimiter(
+  parseInt(process.env.RATE_LIMIT_USER_WINDOW),
+  parseInt(process.env.RATE_LIMIT_USER_MAX)
+);
+
+/**
+ * POST /
+ * Crée un nouveau user dans MongoDB.
+ */
+router.post("/", rateLimiter, async (req, res, next) => {
   try {
-    const firebaseUid = req.firebaseUser.uid; // récupéré du middleware
+    const firebaseUid = req.firebaseUser.uid;
     const email = req.firebaseUser.email;
 
-    // Vérifier si l'utilisateur n'existe pas déjà
     const userExists = await User.findOne({ firebaseUid: firebaseUid });
     if (userExists) {
-      return res
-        .status(409)
-        .json({ error: "Conflict, utilisateur déjà existant" });
+      throw new ConflictError("User already exists in database");
     }
 
     const new_user = new User({ firebaseUid: firebaseUid, email: email });
     await new_user.save();
 
     return res.status(201).json({
-      message: "User crée avec succès",
-      userId: new_user._id,
+      status: "ok",
+      message: "User successfully created",
     });
   } catch (error) {
     console.error(error);
-    return res.status(500).json({ error: "Erreur serveur" });
+    next(error);
   }
 });
 

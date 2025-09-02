@@ -14,6 +14,7 @@ const conversationRoutes = require("./routes/conversations");
 const uploadRoutes = require("./routes/upload");
 const retrieverRoutes = require("./routes/retriever");
 const userRoutes = require("./routes/users");
+const errorHandler = require("./middlewares/errorHandler");
 
 // Connection à MongoDB
 async function main() {
@@ -31,6 +32,7 @@ app.use("/api/conversations", conversationRoutes); // Quand quelqu'un fait une r
 app.use("/api/upload", uploadRoutes);
 app.use("/api/retriever", retrieverRoutes);
 app.use("/api/users", userRoutes);
+app.use(errorHandler);
 
 app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}`);
