@@ -1,65 +1,59 @@
+/**
+ *  Retriever routes
+ * - Génère un prompt basé sur la quetsion de l'utilisateur et les documents du vectorstore
+ */
+
 const express = require("express");
-const { spawn } = require("child_process");
-const path = require("path");
 const verifyFirebaseToken = require("../middlewares/verifyFirebaseToken");
+const { createUserRateLimiter } = require("../utils/rateLimiter");
+const { runPythonScript } = require("../utils/pythonRunner");
 
 const router = express.Router();
 router.use(verifyFirebaseToken);
 
-router.get("/prompt_with_context/:question", async (req, res) => {
-  try {
-    const inputs = req.params;
-    const params = {};
+// --- Rate limiter --- //
+const rateLimiter = createUserRateLimiter(
+  parseInt(process.env.RATE_LIMIT_RETRIEVER_WINDOW),
+  parseInt(process.env.RATE_LIMIT_RETRIEVER_MAX)
+);
 
-    // Appelle le pipeline Kedro "classic_rag"
-    const python = spawn("python", [
-      path.resolve(__dirname, "../../../kedro_pipelines/src/rag/run_kedro.py"),
-      "classic_rag",
-      JSON.stringify(inputs),
-      JSON.stringify(params),
-    ]);
+/**
+ * GET /
+ * Récupère un prompt enrichi avec le contexte pertinent à partir d'une question.
+ */
+router.get(
+  "/prompt_with_context/:question",
+  rateLimiter,
+  async (req, res, next) => {
+    try {
+      const inputs = req.params;
+      const params = {};
 
-    // Récupération de la sortie du script Python :
-    let output = "";
-    let errorOutput = ""; // Tout ce que le script Python écrit sur la sortie d'erreur
-    python.stdout.on("data", (data) => {
-      // Affiche les logs Python en temps réel dans la console Node.js
-      process.stdout.write(data.toString());
-      output += data.toString();
-    });
+      // Appel le pipeline Kedro "classic_rag"
+      const stdout = await runPythonScript({
+        scriptPath: process.env.KEDRO_SCRIPT_PATH,
+        pipeline: process.env.KEDRO_RAG_PIPELINE,
+        inputs: inputs,
+        params: params,
+        captureOutput: true,
+      });
 
-    python.stderr.on("data", (data) => {
-      process.stderr.write(data.toString());
-      errorOutput += data.toString();
-    });
-
-    // Quand le script se termine:
-    python.on("close", (code) => {
-      // supprime les fichiers pdfs uploadés
-      // Si le script Python a échoué
-      if (code !== 0) {
-        console.error("Erreur Python:", errorOutput); // on log l'erreur
-        return res // on renvoie une erreur 500
-          .status(500)
-          .json({ error: "Processing failed", details: errorOutput });
-      }
-      // Sinon récupère le prompt :
-      // Prend la dernière ligne non vide
-      const lines = output.trim().split("\n");
+      // Si réussite on récupère le prompt : Prend la dernière ligne non vide
+      const lines = stdout.trim().split("\n");
       const lastLine = lines
         .reverse()
         .find((line) => line.trim().startsWith("{"));
-      let result;
-      result = JSON.parse(lastLine);
+      const result = JSON.parse(lastLine);
+
       return res.json({
         status: "ok",
         prompt: result.rag_prompt,
       });
-    });
-  } catch (error) {
-    console.error(error);
-    return res.status(500).json({ error: "Erreur serveur" });
+    } catch (error) {
+      console.error(error);
+      next(error);
+    }
   }
-});
+);
 
 module.exports = router;
