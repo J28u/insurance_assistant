@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 requires-python = ">=3.9"
-name = "kedro_pipelines"
+name = "rag"
 readme = "README.md"
 dynamic = ["version"]
 dependencies = [
@@ -15,7 +15,7 @@ dependencies = [
 ]
 
 [project.scripts]
-"kedro" = "kedro_pipelines.__main__:main"
+"kedro" = "rag.__main__:main"
 
 [project.entry-points."kedro.hooks"]
 
@@ -39,7 +39,7 @@ dev = [
 ]
 
 [tool.setuptools.dynamic]
-version = {attr = "kedro_pipelines.__version__"}
+version = {attr = "rag.__version__"}
 
 [tool.setuptools.packages.find]
 where = ["src"]
@@ -56,7 +56,7 @@ source_dir = "src"
 [tool.pytest.ini_options]
 addopts = """
 --cov-report term-missing \
---cov src/kedro_pipelines -ra"""
+--cov src/rag -ra"""
 
 [tool.coverage.report]
 fail_under = 0

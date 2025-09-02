@@ -11,6 +11,7 @@ def main():
         pipeline_name = sys.argv[1]
         inputs = json.loads(sys.argv[2])
         params = json.loads(sys.argv[3])
+        vectorstore_path = sys.argv[4]
     else:
         print("No pipeline name given")
         sys.exit(1)
@@ -20,13 +21,19 @@ def main():
     session = boot_project(
         project_path="../../kedro_pipelines",
         compilation_specs=[
-            CompilationSpec(parameters=list(params.keys()), inputs=list(inputs.keys()))
+            CompilationSpec(
+                parameters=list(params.keys()),
+                inputs=list(inputs.keys()),
+            )
         ],
         kedro_args={
             "pipeline": pipeline_name,
             "conf_source": conf_path,
         },
     )
+
+    catalog = session._context.catalog
+    catalog.datasets["vectorstore"].update_filepath(vectorstore_path)
 
     run_results = session.run(parameters=params, inputs=inputs)
     print(json.dumps(run_results))
