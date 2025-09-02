@@ -37,7 +37,8 @@ function LLMInput({
   };
 
   // Fonction déclenchée lorsqu'au moins un fichier est sélectionné
-  const handleUpload = async (event) => {
+  const handleUpload = async (event, firebaseUser) => {
+    const token = await firebaseUser.getIdToken();
     const files = event.target.files; // récupère tous les fichiers sélectionnés
     const formData = new FormData(); // Objet pour envoyer des fichiers via HTTP
     for (let i = 0; i < files.length; i++) {
@@ -47,7 +48,12 @@ function LLMInput({
     try {
       const res = await axios.post(
         "http://localhost:3000/api/upload",
-        formData // envoi des fichiers au backend
+        formData, // envoi des fichiers au backend,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
       );
     } catch (error) {
       console.error(
@@ -336,7 +342,7 @@ function LLMInput({
                 multiple
                 style={{ display: "none" }} // champ est caché
                 ref={fileInputRef}
-                onChange={handleUpload} // quand il devient "visible" -> déclenche la sélection des fichiers
+                onChange={(event) => handleUpload(event, firebaseUser)} // quand il devient "visible" -> déclenche la sélection des fichiers
               />
             </div>
             <div style={{ marginRight: "10px", marginLeft: "10px" }}>

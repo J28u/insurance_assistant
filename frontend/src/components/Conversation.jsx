@@ -142,7 +142,7 @@ const Conversation = ({
                   display: "flex",
                 }}
               >
-                {msg.role === "user" ? ( // affiche logo Deepseek si bot, sinon div vide
+                {msg.role === "user" ? ( // affiche logo si bot, sinon div vide
                   <div
                     style={{
                       marginRight: "15px",
