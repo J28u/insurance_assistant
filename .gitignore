@@ -414,6 +414,7 @@ FodyWeavers.xsd
 
 # ignore everything in the following folders
 **/data/**
+**/notebooks/**
 
 # except their sub-folders
 !**/data/**/
