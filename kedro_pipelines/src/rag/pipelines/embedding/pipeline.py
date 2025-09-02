@@ -15,6 +15,7 @@ def create_embedding_pipeline(**kwargs) -> Pipeline:
                     chunk_size="params:chunk_size",
                     chunk_overlap="params:chunk_overlap",
                     separators="params:separators",
+                    suspicious_patterns="params:suspicious_patterns"
                 ),
                 outputs="chunks",
                 name="parsing_node",

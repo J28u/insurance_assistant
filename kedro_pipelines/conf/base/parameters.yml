@@ -13,3 +13,23 @@ retriever_config:
   search_type: "similarity"
   search_kwargs:
     k: 1
+
+suspicious_patterns: [
+    # English
+    r"(ignore\s+previous\s+instructions?)",
+    r"(###\s*system\s*message\s*###)",
+    r"(prompt\s*injection)",
+    r"(jailbreak)",
+    r"(do\s+anything\s+now)",
+    r"(bypass\s+restrictions)",
+    r"(override\s+instructions)",
+
+    # Français
+    r"(ignorer\s+les\s+instructions\s+précédentes?)",
+    r"(###\s*message\s*système\s*###)",
+    r"(injection\s*de\s*prompt)",
+    r"(jailbreak)",
+    r"(faire\s+n'importe\s+quoi\s+maintenant)",
+    r"(contourner\s+les\s+restrictions)",
+    r"(outrepasser\s+les\s+instructions)",
+  ]
