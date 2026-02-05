@@ -30,6 +30,10 @@ Sécurisation de l'app :
 .
 ├── backend/                        # Backend Node.js : API Express + Mongoose (MongoDB)
 │   └── src/
+│       ├── error/                  # Traduit les erreurs techniques en erreurs métier compréhensibles et normalisées
+│       ├── middlewares/            # Middlewares Express
+│       │   ├── errorHandler.js
+│       │   └── verifyFirebaseToken.js
 │       ├── models/                 # Schémas Mongoose pour les collections MongoDB
 │       │   ├── Conversation.js
 │       │   ├── Message.js
