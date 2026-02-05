@@ -16,6 +16,8 @@ import SignIn from "./components/SignIn.jsx";
 import SignUp from "./components/SignUp.jsx";
 import axios from "axios";
 
+const API_URL = import.meta.env.VITE_API_URL;
+
 // ------------------------------------STYLE----------------------------------------------------
 
 const styles = {
@@ -77,6 +79,7 @@ function App() {
   const menuRefs = useRef({}); // clé = conversation._id, valeur = ref DOM
   const [firebaseUser, setfirebaseUser] = useState(null);
   const [showSignIn, setShowSignIn] = useState(true);
+  const [context, setContext] = useState([]);
 
   // ------------------------------------- FONCTIONS -------------------------------------------------------------
 
@@ -87,7 +90,7 @@ function App() {
       setConvLoading(true);
       try {
         const response = await axios.get(
-          `http://localhost:3000/api/conversations/onlyone/${conversationId}`,
+          `${API_URL}/api/conversations/onlyone/${conversationId}`,
           {
             headers: {
               Authorization: `Bearer ${token}`,
@@ -111,14 +114,11 @@ function App() {
     try {
       const token = await firebaseUser.getIdToken();
 
-      const response = await axios.get(
-        `http://localhost:3000/api/conversations/user`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
+      const response = await axios.get(`${API_URL}/api/conversations/user`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
       console.log("Conversations:", response.data);
       setConversations(response.data.conversations);
       categorizeConversations(response.data.conversations);
@@ -170,7 +170,7 @@ function App() {
     try {
       const token = await firebaseUser.getIdToken();
       const response = await axios.delete(
-        `http://localhost:3000/api/conversations/conversation/${conversationId}`,
+        `${API_URL}/api/conversations/conversation/${conversationId}`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -427,6 +427,8 @@ function App() {
                 setMessages={setMessages}
                 showFirstMessages={showFirstMessages}
                 setShowFirstMessages={setShowFirstMessages}
+                context={context}
+                setContext={setContext}
               />
             )}
             {view === "library" && <Library contracts={contrats} />}
@@ -452,6 +454,8 @@ function App() {
                 setMessages={setMessages}
                 showFirstMessages={showFirstMessages}
                 setShowFirstMessages={setShowFirstMessages}
+                context={context}
+                setContext={setContext}
               />
             )}
           </div>

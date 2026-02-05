@@ -5,6 +5,8 @@ import macaronIcon from "../assets/macaron.png";
 import "../style.css";
 import axios from "axios";
 
+const API_URL = import.meta.env.VITE_API_URL;
+
 function SignUp({ onLoginSuccess, switchToSignIn }) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -14,7 +16,7 @@ function SignUp({ onLoginSuccess, switchToSignIn }) {
     try {
       const token = await firebaseUser.getIdToken();
       const response = await axios.post(
-        "http://localhost:3000/api/users",
+        `${API_URL}/api/users`,
         {},
         {
           headers: {

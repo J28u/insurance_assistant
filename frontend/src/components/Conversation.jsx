@@ -72,10 +72,23 @@ function decodeHTML(encodedStr) {
     .replace(/\\u0027/g, "'");
 }
 
+/* Fonction d’échappement HTML pour éviter les injections XSS (<, >, &)*/
+function escapeHTML(str) {
+  if (!str) return "";
+  return str.replace(
+    /[&<>"']/g,
+    (m) =>
+      ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[
+        m
+      ])
+  );
+}
+
 const Conversation = ({
   conversationTitle,
   convLoading,
   messages,
+  context,
   loading,
   conversationID,
 }) => {
@@ -193,14 +206,47 @@ const Conversation = ({
                   // si role bot, structure la réponse avec du HTML, sinon du texte brute
                   dangerouslySetInnerHTML={
                     msg.role === "assistant"
-                      ? { __html: DOMPurify.sanitize(decodeHTML(msg.content)) }
+                      ? {
+                          __html: DOMPurify.sanitize(decodeHTML(msg.content), {
+                            // Pas de scripts, attributs inline ou iframes dans le HTML du bot.
+                            ALLOWED_TAGS: [
+                              "b",
+                              "i",
+                              "u",
+                              "p",
+                              "br",
+                              "ul",
+                              "li",
+                            ],
+                            ALLOWED_ATTR: [],
+                          }),
+                        }
                       : undefined
                   }
                 >
-                  {msg.role === "user" ? msg.content : null}
+                  {msg.role === "user" ? escapeHTML(msg.content) : null}
                 </div>
               </div>
             )
+          )}
+
+          {context && (
+            <div
+              style={{
+                marginTop: "20px",
+                padding: "16px",
+                border: "1px solid #eee",
+                borderRadius: "8px",
+                backgroundColor: "#f9f9f9",
+                fontSize: "14px",
+                color: "#555",
+              }}
+            >
+              <strong>Contexte utilisé :</strong>
+              <pre style={{ whiteSpace: "pre-wrap", marginTop: "8px" }}>
+                {context}
+              </pre>
+            </div>
           )}
         </div>
       )}

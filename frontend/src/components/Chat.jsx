@@ -24,6 +24,8 @@ function Chat({
   setMessages,
   showFirstMessages,
   setShowFirstMessages,
+  context,
+  setContext,
 }) {
   return (
     <div>
@@ -32,6 +34,7 @@ function Chat({
           conversationTitle={conversationTitle}
           convLoading={convLoading}
           messages={messages}
+          context={context}
           loading={loading}
           conversationId={conversationId}
         />
@@ -55,6 +58,8 @@ function Chat({
           setMessages={setMessages}
           showFirstMessages={showFirstMessages}
           setShowFirstMessages={setShowFirstMessages}
+          context={context}
+          setContext={setContext}
         />
       </div>
     </div>

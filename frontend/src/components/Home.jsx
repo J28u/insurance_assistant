@@ -22,6 +22,8 @@ function Home({
   setMessages,
   showFirstMessages,
   setShowFirstMessages,
+  context,
+  setContext,
 }) {
   return (
     <div style={{ position: "relative", minHeight: "100vh", padding: "20px" }}>
@@ -106,6 +108,8 @@ function Home({
           setMessages={setMessages}
           showFirstMessages={showFirstMessages}
           setShowFirstMessages={setShowFirstMessages}
+          context={context}
+          setContext={setContext}
         />
       </div>
     </div>
