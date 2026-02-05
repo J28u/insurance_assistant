@@ -4,6 +4,7 @@ import sys
 
 from kedro_boot.app.booter import boot_project
 from kedro_boot.framework.compiler.specs import CompilationSpec
+from rag.custom_datasets.faiss_vectorstore_dataset import FaissVectorstoreDataset
 
 
 def main():
@@ -16,6 +17,8 @@ def main():
         print("No pipeline name given")
         sys.exit(1)
     conf_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../conf"))
+
+    inputs["vectorstore"] = FaissVectorstoreDataset(vectorstore_path).load()
 
     # Boot Kedro project
     session = boot_project(

@@ -68,8 +68,7 @@ def sanitize_chunk(chunk: str, suspicious_patterns: list[str]) -> str:
         pattern = re.compile(pat, flags=re.IGNORECASE)
         matches = pattern.findall(normalized_chunk)
         if matches:
-            chunk = pattern.sub("[REDACTED]", chunk)
-            normalized_chunk = pattern.sub("[REDACTED]", normalized_chunk)
+            chunk = pattern.sub("[CENSURÉ]", chunk)
 
     # Remove invisible control characters (except \n and \t)
     chunk = re.sub(r"[\x00-\x08\x0B-\x1F\x7F]", "", chunk)

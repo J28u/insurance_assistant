@@ -7,41 +7,22 @@
 
 const express = require("express");
 const multer = require("multer");
-const os = require("os");
 const path = require("path");
 const fs = require("fs");
 const { v4: uuidv4 } = require("uuid");
 
 const verifyFirebaseToken = require("../middlewares/verifyFirebaseToken");
 const { validateUploadedPDFs } = require("../utils/validation/fileValidation");
-const { validateUser } = require("../utils/validation/mongoValidation");
-const InvalidFileTypeError = require("../errors/InvalidFileTypeError");
 const { createUserRateLimiter } = require("../utils/rateLimiter");
 const { runPythonScript } = require("../utils/pythonRunner");
+const {
+  getUserVectorstorePath,
+  createUploadTempDir,
+} = require("../utils/fileUtils");
+const InvalidFileTypeError = require("../errors/InvalidFileTypeError");
 
 const router = express.Router();
 router.use(verifyFirebaseToken);
-
-/**
- * Crée un dossier temporaire pour les uploads (permissions strictes, seul le processus Node peut lire/écrire).
- */
-function createUploadTempDir() {
-  const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "pdf-upload-"));
-  fs.chmodSync(tmpDir, 0o700);
-  return tmpDir;
-}
-
-/**
- * Construit le chemin vectorstore spécifique à un utilisateur.
- * @param {string} userId - Firebase UID de l'utilisateur
- * @returns {string} chemin complet vers le vectorstore
- */
-function getUserVectorstorePath(userId) {
-  const baseDir = path.resolve(__dirname, process.env.VECTORSTORES_DIR);
-  const userDir = path.join(baseDir, userId);
-  fs.mkdirSync(userDir, { recursive: true });
-  return path.join(userDir, process.env.VECTORSTORE_FILE_NAME);
-}
 
 // --- Multer config --- //
 const uploadDir = createUploadTempDir();
@@ -102,16 +83,13 @@ router.post(
       }
       await validateUploadedPDFs(req.files);
 
-      // Vérification utilisateur
-      const firebaseUid = req.firebaseUser.uid;
-      await validateUser(firebaseUid);
-
       // Préparation des données pour le script Python
       const filesWithMetadata = req.files.map((f) => ({
         storedPath: path.resolve(f.path),
         originalName: f.originalname,
       }));
 
+      const firebaseUid = req.firebaseUser.uid;
       const vectorstorePath = getUserVectorstorePath(firebaseUid);
       const pdfPaths = filesWithMetadata.map((f) => f.storedPath);
       const pdfMetadataMap = Object.fromEntries(
@@ -131,7 +109,7 @@ router.post(
         pipeline: process.env.KEDRO_EMBEDDING_PIPELINE,
         inputs: inputs,
         params: params,
-        outputPath: vectorstorePath,
+        vectorstorePath: vectorstorePath,
         cleanup: () => fs.rmSync(uploadDir, { recursive: true, force: true }), // Supprime le dossier temporaire contenant tous les fichiers
       });
       res.status(200).json({

@@ -10,7 +10,7 @@ const PythonProcessError = require("../errors/PythonProcessError");
  * @param {string} options.pipeline - nom du pipeline Kedro à exécuter
  * @param {Object} [options.inputs] - paramètres "inputs" sérialisés en JSON
  * @param {Object} [options.params] - paramètres "params" sérialisés en JSON
- * @param {string} [options.outputPath] - chemin de sortie
+ * @param {string} options.vectorstorePath - chemin du vectorstore
  * @param {boolean} [options.captureOutput=false] - si true, retourne le stdout du script
  * @param {Function} [options.cleanup] - callback à exécuter après la fin (succès ou erreur)
  * @returns {Promise<string|void>} - stdout si captureOutput=true, sinon void
@@ -20,21 +20,19 @@ function runPythonScript({
   pipeline,
   inputs = {},
   params = {},
-  outputPath,
+  vectorstorePath,
   captureOutput = false,
   cleanup,
 }) {
   return new Promise((resolve, reject) => {
-    const args = [
+    const python = spawn(process.env.PYTHON_INTERPRETER, [
       path.resolve(__dirname, scriptPath),
       pipeline,
       JSON.stringify(inputs),
       JSON.stringify(params),
-      outputPath,
-    ];
-    if (outputPath) args.push(outputPath);
+      vectorstorePath,
+    ]);
 
-    const python = spawn("python", args);
     let stdoutData = "";
 
     // Affiche les logs Python en temps réel dans la console Node.js

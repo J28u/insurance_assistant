@@ -1,6 +1,5 @@
 /**
  * Conversation routes (MongoDB)
- * - Création de conversation
  * - Liste des conversations utilisateur
  * - Récupération d'une conversation avec ses messages
  * - Suppression d'une conversation
@@ -8,7 +7,6 @@
 
 const express = require("express");
 const verifyFirebaseToken = require("../middlewares/verifyFirebaseToken");
-const NotFoundError = require("../errors/NotFoundError");
 const { createUserRateLimiter } = require("../utils/rateLimiter");
 const {
   validateUser,
@@ -22,11 +20,6 @@ const router = express.Router();
 router.use(verifyFirebaseToken);
 
 // --- Rate limiters --- //
-const convCreateRateLimiter = createUserRateLimiter(
-  Number(process.env.RATE_LIMIT_CONV_CREATE_WINDOW),
-  Number(process.env.RATE_LIMIT_CONV_CREATE_MAX)
-);
-
 const convListRateLimiter = createUserRateLimiter(
   Number(process.env.RATE_LIMIT_CONV_LIST_WINDOW),
   Number(process.env.RATE_LIMIT_CONV_LIST_MAX)
@@ -35,52 +28,6 @@ const convDeleteRateLimiter = createUserRateLimiter(
   Number(process.env.RATE_LIMIT_CONV_DELETE_WINDOW),
   Number(process.env.RATE_LIMIT_CONV_DELETE_MAX)
 );
-
-/**
- * POST /
- * Crée une nouvelle conversation MongoDB avec ses premiers messages.
- */
-router.post("/", convCreateRateLimiter, async (req, res, next) => {
-  try {
-    const firebaseUid = req.firebaseUser.uid;
-    const { conversationId, messages, title } = req.body;
-
-    const user = await validateUser(firebaseUid);
-    const userId = user._id;
-
-    let conversation = await Conversation.findById(conversationId);
-
-    if (!conversation) {
-      if (!messages || messages.length === 0) {
-        throw new NotFoundError("No input message");
-      }
-
-      conversation = new Conversation({ userId, title });
-
-      await conversation.save();
-    }
-
-    const messageDocs = await Message.insertMany(
-      messages.map((msg) => ({
-        conversationId: conversation._id,
-        role: msg.role,
-        content: msg.content,
-      }))
-    );
-
-    // Mise à jour de la conversation : ajoute les IDs des nouveaux messages à la conversation (conserve les anciens d'où les '...')
-    conversation.messages.push(...messageDocs.map((msg) => msg._id));
-    await conversation.save();
-
-    return res.status(201).json({
-      message: "Conversation successfully created",
-      conversationId: conversation._id,
-    });
-  } catch (error) {
-    console.error(error);
-    next(error);
-  }
-});
 
 /**
  * GET /user
