@@ -35,16 +35,18 @@ function errorHandler(err, req, res, next) {
         break;
     }
 
-    return res.status(400).json({ error: message });
+    return res.status(400).json({ status: "error", message: message });
   }
 
   // Erreurs personnalisées avec statusCode
   if (err.statusCode) {
-    return res.status(err.statusCode).json({ error: err.message });
+    return res
+      .status(err.statusCode)
+      .json({ status: "error", message: err.message });
   }
 
   // Erreur serveur par défaut
-  res.status(500).json({ error: `Internal server error` });
+  res.status(500).json({ status: "error", message: `Internal server error` });
 }
 
 module.exports = errorHandler;
