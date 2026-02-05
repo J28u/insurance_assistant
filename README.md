@@ -1,19 +1,43 @@
 # Personal Insurance Chatbot — Fullstack JS (Vite + Express + MongoDB)
 
-Chatbot à déployer en local pour poser des questions sur ses contrats d'assurance sans envoyer ses infos persos à OpenAI.
+Proof of Concept (POC) fullstack à déployer en local, permettant à un utilisateur de poser des questions sur ses contrats d’assurance via un chatbot, sans exposer ses données personnelles à des services LLM tiers.
 
-## But du projet
+![Interface principale du Personal Insurance Chatbot](./screenshots/macaron_app.gif)
+
+## Contexte du projet
+
+Projet fil rouge réalisé dans le cadre de la formation "Chef de projet IA -- Wild Code School / Simplon", avec pour objectif de concevoir un prototype fonctionnel mettant l’accent sur l’architecture, la sécurité des données et l’intégration de technologies LLM (RAG).
+
+## Objectifs du projet
 
 Développer une application capable d'assister un utilisateur dans la compréhension de ses contrats d'assurance, à l'aide d'un chatbot intelligent.
 
-## Etat actuel (Livrables semaine 11 projet fil rouge)
+## État actuel du projet — Livrables semaine 9
 
-Sécurisation de l'app :
+Sécurisation de l'application :
 
-- ✅ Pages d'authentification Firebase (SignIn/SignUp).
-- ✅ Middleware de vérification du token Firebase sur toutes les routes du backend.
-- ✅ Contrôle d’accès : le backend vérifie que l’utilisateur accède ou modifie uniquement ses propres données (ex: conversations liées à son compte).
-- ✅
+- ✅ Authentification Firebase : mise en place des pages Sign In et Sign Up.
+- ✅ Protection des routes backend : middleware de vérification du token Firebase appliqué à l’ensemble des endpoints.
+- ✅ Contrôle d’accès : le backend garantit qu’un utilisateur ne peut accéder ou modifier que ses propres ressources (ex. conversations associées à son compte).
+- ✅ Gestion et limitation des requêtes : mise en place de rate limiting par utilisateur.
+- ✅ Sécurisation de l’upload des PDF (Multer) :
+  - limitation de la taille et du nombre de fichiers,
+  - filtrage strict des types de fichiers autorisés,
+  - génération de noms de fichiers sécurisés,
+  - suppression automatique des fichiers après ingestion dans le vector store.
+- ✅ Gestion des erreurs :
+  - création de classes d’erreurs personnalisées,
+  - middleware global d’interception des erreurs,
+  - envoi de réponses propres et sûres au frontend, sans exposition d’informations sensibles.
+- ✅ Sécurité RAG / LLM :
+  - déplacement de l’intégralité de la logique LLM (retriever, appels, streaming) dans le backend,
+  - sanitization basique des chunks (regex),
+  - encapsulation contrôlée du contexte dans le prompt,
+  - séparation claire des rôles (system / context / user),
+  - limitation de la longueur des inputs utilisateur.
+- ✅ Vector Store multi-utilisateur :
+  - chaque utilisateur ne peut modifier que son propre vector store,
+  - association obligatoire du vector store à l’utilisateur en base MongoDB avant toute modification.
 
 ## Suivis des changements entre les livrables
 
@@ -22,7 +46,7 @@ Sécurisation de l'app :
 | 6       | `week-06` | Mise en place de la structure fullstack du chatbot | [Voir commits](https://github.com/J28u/insurance_assistant/compare/204a969...week-06) |
 | 7       | `week-07` | Intégration d’un RAG classique                     | [Voir commits](https://github.com/J28u/insurance_assistant/compare/week-06...week-07) |
 | 8       | `week-08` | Finalisation d'un POC présentable                  | [Voir commits](https://github.com/J28u/insurance_assistant/compare/week-07...week-08) |
-| 11      | `week-11` | Sécurisation de l'app                              | [Voir commits](https://github.com/J28u/insurance_assistant/compare/week-08...week-11) |
+| 9       | `week-09` | Sécurisation de l'app                              | [Voir commits](https://github.com/J28u/insurance_assistant/compare/week-08...week-09) |
 
 ## 📁 Structure du projet
 
@@ -30,19 +54,27 @@ Sécurisation de l'app :
 .
 ├── backend/                        # Backend Node.js : API Express + Mongoose (MongoDB)
 │   └── src/
-│       ├── error/                  # Traduit les erreurs techniques en erreurs métier compréhensibles et normalisées
-│       ├── middlewares/            # Middlewares Express
-│       │   ├── errorHandler.js
-│       │   └── verifyFirebaseToken.js
+│       ├── errors/                  # Traduit les erreurs techniques en erreurs métier compréhensibles et normalisées
+│       ├── middlewares/
+│       │   ├── errorHandler.js     # Middleware Express pour envoyer une réponse claire au frontend avec le bon status code
+│       │   ├── validateRequest.js  # Middleware Express pour valider les paramètres d'une requête
+│       │   └── verifyFirebaseToken.js # Middleware Express pour vérifier un token Firebase ID
+│       │
 │       ├── models/                 # Schémas Mongoose pour les collections MongoDB
 │       │   ├── Conversation.js
 │       │   ├── Message.js
 │       │   └── User.js
+│       │
 │       ├── routes/                 # Routes Express pour l'API REST
+│       │   ├── chat.js             # Routes pour la gestions des appels au LLM
 │       │   ├── conversations.js    # Routes pour la gestion des conversations
-│       │   ├── users.js            # Routes pour la gestion des utilisateurs
-│       │   ├── retriever.js        # Routes pour la récupération de documents pertinents et du prompt enrichi.
-│       │   └── upload.js           # Routes pour le chargement des documents pdfs
+│       │   ├── upload.js           # Routes pour le chargement des documents pdfs
+│       │   └── users.js            # Routes pour la gestion des utilisateurs
+│       ├── services/
+│       │   ├── conversations.js
+│       │   └── retriever.js
+│       ├── utils/
+│       ├── firebaseAdmin.js        # Initialisation du SDK Firebase Admin côté serveur
 │       └── index.js                # Point d'entrée backend : connexion DB et configuration des routes
 │
 ├── frontend/                       # Frontend React (Vite)
@@ -58,6 +90,7 @@ Sécurisation de l'app :
 │       │   ├── SignIn.jsx
 │       │   └── SignUp.jsx
 │       ├── App.jsx                 # Composant racine de l'application
+│       ├── firebase.js             # Initialisation du SDK Firebase côté client
 │       ├── index.css               # Styles globaux
 │       ├── main.jsx                # Point d'entrée principal React
 │       └── style.css               # Styles spécifiques (boutons, spinner, etc.)
@@ -74,17 +107,9 @@ Sécurisation de l'app :
 │   │   ├── logging.yml             # Configuration des logs Kedro
 │   │   └── README.md               # Documentation des configs (générée par Kedro)
 │   ├── data/                       # Données du pipeline (non versionnées)
-│   │   ├── 01_raw/                 # Données brutes
-│   │   ├── 02_intermediate/        # Données intermédiaires
-│   │   ├── 03_primary/             # Données primaires
-│   │   ├── 04_feature/             # Features extraites
-│   │   ├── 05_model_input/         # Données prêtes pour les modèles
-│   │   ├── 06_models/              # Modèles entraînés
-│   │   ├── 07_model_output/        # Prédictions, résultats de modèles
-│   │   └── 08_reporting/           # Rapports, visualisations
 │   ├── src/
 │   │   └── rag/                    # Package principal Kedro
-│   │       ├── datasets/           # Datasets personnalisés (ex: FAISS)
+│   │       ├── custom_datasets/    # Datasets personnalisés (ex: FAISS)
 │   │       │   └── faiss_vectorstore_dataset.py
 │   │       ├── pipelines/
 │   │       │   ├── embedding/      # Pipeline d'embedding (vectorisation des documents)
@@ -118,46 +143,55 @@ git clone https://github.com/J28u/insurance_assistant.git
 cd insurance_assistant
 ```
 
-### 2. Créer une base MongoDB (pour l'historisation des conversations)
+### 2. Créer un fichier .env
+
+- Copier le fichier exemple fourni et remplir avec vos informations :
+
+```bash
+cp backend/src/.env.example backend/src/.env
+```
+
+- Modifier ensuite les variables avec vos clés locales / Firebase
+
+### 3. Créer une base MongoDB (pour l'historisation des conversations)
 
 - appeler cette base 'chatbotdb'
-- créer une collection users avec un utilisateur dont l'id est 68235ea293d0a7e8eab16d47
-- créer un fichier .env dans /backend/src avec les variables suivantes :
+- renseigner la variable suivante dans .env :
 
 ```env
 MONGODB_URL = mongodb+srv://<db_username>:<db_password>@cluster0.agni83b.mongodb.net/chatbotdb?retryWrites=true&w=majority&appName=Cluster0
 ```
 
-### 3. Installer les dépendances Python (Kedro, LangChain, etc.)
+### 4. Installer les dépendances Python (Kedro, LangChain, etc.)
 
 ```bash
 pip install -r requirements.txt
 ```
 
-### 4. Déployer le LLM
+### 5. Déployer le LLM
 
 - [installer Ollama](https://ollama.com/download)
-- télécharger le modèle choisi depuis Huggingface
+- télécharger le modèle choisi :
 
 ```
-ollama pull hf.co/cognitivecomputations/Dolphin3.0-Llama3.1-8B-GGUF:Q6_K
+ollama pull gemma3:4b-it-q4_K_M
 ```
 
-- renseigner le nom du modèle dans le frontend (LLMInput ligne 79)
+- renseigner le nom du modèle dans le fichier .env :
 
-```
- model: "hf.co/cognitivecomputations/Dolphin3.0-Llama3.1-8B-GGUF:Q6_K"
+```env
+ MODEL_CHAT = "gemma3:4b-it-q4_K_M"
 ```
 
-- lancer le serveur en arrière plan
+- lancer le serveur en arrière plan :
 
-```
+```bash
 ollama serve
 ```
 
-### 5. Déployer le backend
+### 6. Déployer le backend
 
-- installer les dépendances
+- installer les dépendances :
 
 ```bash
 cd backend
@@ -171,23 +205,23 @@ cd src
 node index.js
 ```
 
-### 6. Déployer le frontend
+### 7. Déployer le frontend
 
-- installer les dépendances
+- installer les dépendances :
 
 ```bash
 cd frontend
 npm install
 ```
 
-- lancer l'application
+- lancer l'application :
 
 ```bash
 cd src
 npm run dev
 ```
 
-### 7. Utilisation des pipelines Kedro
+### 8. Utilisation des pipelines Kedro
 
 #### Changer le modèle d'embedding utilisé par le rag:
 
@@ -233,7 +267,6 @@ Pour plus d'options, veuillez consulter la documentation [Kedro](https://docs.ke
 - GET /api/conversations/user/:userId : récupérer les conversations d’un utilisateur
 - GET /api/conversations/onlyone/:conversationId : récupérer les messages d’une conversation
 - POST /api/upload/ : charger des pdfs, les découper en chunks et sauvegarder leurs embeddings dans une base vectorielle.
-- GET /api/retriever/prompt_with_context/:question : récupérer un prompt enrichi d'un contexte pertinent.
 
 ## 🧩 Composants React
 
