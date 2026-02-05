@@ -40,9 +40,9 @@ const fileFilter = function (req, file, cb) {
   if (!file.originalname.toLowerCase().endsWith(process.env.PDF_EXTENSION)) {
     return cb(
       new InvalidFileTypeError(
-        `Invalid extension : ${file.originalname} is not .pdf`
+        `Invalid extension : ${file.originalname} is not .pdf`,
       ),
-      false
+      false,
     );
   }
   if (file.mimetype !== process.env.ALLOWED_FILE_TYPES) {
@@ -64,7 +64,7 @@ const upload = multer({
 const uploadRateLimiter = createUserRateLimiter(
   Number(process.env.RATE_LIMIT_UPLOAD_WINDOW),
   Number(process.env.RATE_LIMIT_UPLOAD_MAX),
-  "Too many uploads. Please wait before uploading again."
+  "Too many uploads. Please wait before uploading again.",
 );
 
 /**
@@ -93,7 +93,7 @@ router.post(
       const vectorstorePath = getUserVectorstorePath(firebaseUid);
       const pdfPaths = filesWithMetadata.map((f) => f.storedPath);
       const pdfMetadataMap = Object.fromEntries(
-        filesWithMetadata.map((f) => [f.storedPath, f.originalName])
+        filesWithMetadata.map((f) => [f.storedPath, f.originalName]),
       );
 
       const params = {
@@ -120,7 +120,7 @@ router.post(
       console.error(error);
       next(error);
     }
-  }
+  },
 );
 
 module.exports = router;

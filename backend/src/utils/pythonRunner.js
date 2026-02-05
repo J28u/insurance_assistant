@@ -47,7 +47,7 @@ function runPythonScript({
       if (cleanup) cleanup();
       if (code !== 0)
         return reject(
-          new PythonProcessError("Error while processing Python script")
+          new PythonProcessError("Error while processing Python script"),
         );
       if (captureOutput) return resolve(stdoutData);
       resolve();
