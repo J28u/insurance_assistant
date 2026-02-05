@@ -2,6 +2,8 @@ import json
 import os
 import sys
 
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../../src")))
+
 from kedro_boot.app.booter import boot_project
 from kedro_boot.framework.compiler.specs import CompilationSpec
 from rag.custom_datasets.faiss_vectorstore_dataset import FaissVectorstoreDataset
@@ -18,7 +20,8 @@ def main():
         sys.exit(1)
     conf_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../conf"))
 
-    inputs["vectorstore"] = FaissVectorstoreDataset(vectorstore_path).load()
+    if pipeline_name == "classic_rag":
+        inputs["vectorstore"] = FaissVectorstoreDataset(vectorstore_path).load()
 
     # Boot Kedro project
     session = boot_project(
@@ -35,8 +38,9 @@ def main():
         },
     )
 
-    catalog = session._context.catalog
-    catalog.datasets["vectorstore"].update_filepath(vectorstore_path)
+    if pipeline_name == "embedding":
+        catalog = session._context.catalog
+        catalog.datasets["vectorstore"].update_filepath(vectorstore_path)
 
     run_results = session.run(parameters=params, inputs=inputs)
     print(json.dumps(run_results))
