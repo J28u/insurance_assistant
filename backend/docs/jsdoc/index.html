@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Home</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Home</h1>
+
+    
+
+
+
+    
+
+
+    <h3> </h3>
+
+
+
+
+
+
+
+
+
+
+    
+
+
+
+
+    <section>
+        <article><h1>Personal Insurance Chatbot — Fullstack JS (Vite + Express + MongoDB)</h1>
+<p>Chatbot à déployer en local pour poser des questions sur ses contrats d'assurance sans envoyer ses infos persos à OpenAI.</p>
+<h2>But du projet</h2>
+<p>Développer une application capable d'assister un utilisateur dans la compréhension de ses contrats d'assurance, à l'aide d'un chatbot intelligent.</p>
+<h2>Etat actuel (Livrables semaine 8 projet fil rouge)</h2>
+<p>Finalisation d'un POC présentable, avec :</p>
+<ul>
+<li>✅ Nouvelle identité visuelle : thème <em>matcha</em> et mascotte &quot;Macaron&quot;</li>
+<li>✅ Améliorations UX : tooltip, suppression/renommage de conversations via l'UI</li>
+<li>✅ Page &quot;Bibliothèque&quot; pour consulter les contrats indexés</li>
+<li>✅ Refonte du prompt et amélioration des métadonnées (PDF, rôles assistant/bot)</li>
+</ul>
+<h2>Suivis des changements entre les livrables</h2>
+<table>
+<thead>
+<tr>
+<th>Semaine</th>
+<th>Tag</th>
+<th>Description</th>
+<th>Historique GitHub</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>6</td>
+<td><code>week-06</code></td>
+<td>Mise en place de la structure fullstack du chatbot</td>
+<td><a href="https://github.com/J28u/insurance_assistant/compare/204a969...week-06">Voir commits</a></td>
+</tr>
+<tr>
+<td>7</td>
+<td><code>week-07</code></td>
+<td>Intégration d’un RAG classique</td>
+<td><a href="https://github.com/J28u/insurance_assistant/compare/week-06...week-07">Voir commits</a></td>
+</tr>
+<tr>
+<td>8</td>
+<td><code>week-08</code></td>
+<td>Finalisation d'un POC présentable</td>
+<td><a href="https://github.com/J28u/insurance_assistant/compare/week-07...week-08">Voir commits</a></td>
+</tr>
+</tbody>
+</table>
+<h2>📁 Structure du projet</h2>
+<pre class="prettyprint source"><code>.
+├── backend/                        # Backend Node.js : API Express + Mongoose (MongoDB)
+│   └── src/
+│       ├── models/                 # Schémas Mongoose pour les collections MongoDB
+│       │   ├── Conversation.js
+│       │   ├── Message.js
+│       │   └── User.js
+│       ├── routes/                 # Routes Express pour l'API REST
+│       │   ├── conversations.js    # Routes pour la gestion des conversations
+│       │   ├── retriever.js        # Routes pour la récupération de documents pertinents et du prompt enrichi.
+│       │   └── upload.js           # Routes pour le chargement des documents pdfs
+│       └── index.js                # Point d'entrée backend : connexion DB et configuration des routes
+│
+├── frontend/                       # Frontend React (Vite)
+│   ├── public/                     # Fichiers statiques accessibles par le navigateur
+│   └── src/
+│       ├── assets/                 # Images, polices, etc.
+│       ├── components/             # Composants React réutilisables
+│       │   ├── Chat.jsx
+│       │   ├── Conversation.jsx
+│       │   ├── LLMInput.jsx
+│       │   ├── Home.jsx
+│       │   └── Library.jsx
+│       ├── App.jsx                 # Composant racine de l'application
+│       ├── index.css               # Styles globaux
+│       ├── main.jsx                # Point d'entrée principal React
+│       └── style.css               # Styles spécifiques (boutons, spinner, etc.)
+│
+├── kedro_pipelines/                # Pipelines de Machine Learning/Data avec Kedro
+│   ├── conf/                       # Configuration Kedro (catalogues, paramètres, logs, prompts)
+│   │   ├── base/
+│   │   │   ├── catalog.yml         # Définition des datasets (inputs/outputs)
+│   │   │   └── parameters.yml      # Paramètres globaux des pipelines
+│   │   ├── local/
+│   │   │   └── credentials.yml     # Secrets et credentials (non versionnés)
+│   │   ├── prompt_template/
+│   │   │   └── prompt_assistant.txt # Template de prompt pour le RAG (contexte + question)
+│   │   ├── logging.yml             # Configuration des logs Kedro
+│   │   └── README.md               # Documentation des configs (générée par Kedro)
+│   ├── data/                       # Données du pipeline (non versionnées)
+│   │   ├── 01_raw/                 # Données brutes
+│   │   ├── 02_intermediate/        # Données intermédiaires
+│   │   ├── 03_primary/             # Données primaires
+│   │   ├── 04_feature/             # Features extraites
+│   │   ├── 05_model_input/         # Données prêtes pour les modèles
+│   │   ├── 06_models/              # Modèles entraînés
+│   │   ├── 07_model_output/        # Prédictions, résultats de modèles
+│   │   └── 08_reporting/           # Rapports, visualisations
+│   ├── src/
+│   │   └── rag/                    # Package principal Kedro
+│   │       ├── datasets/           # Datasets personnalisés (ex: FAISS)
+│   │       │   └── faiss_vectorstore_dataset.py
+│   │       ├── pipelines/
+│   │       │   ├── embedding/      # Pipeline d'embedding (vectorisation des documents)
+│   │       │   │   ├── nodes.py
+│   │       │   │   └── pipeline.py
+│   │       │   └── rag_classic/    # Pipeline RAG classique (retrieval + prompt)
+│   │       │       ├── nodes.py
+│   │       │       └── pipeline.py
+│   │       ├── __main__.py         # Entrée CLI du package Kedro
+│   │       ├── pipeline_registry.py# Déclaration des pipelines disponibles
+│   │       ├── run_kedro.py        # Script de lancement d'un pipeline via kedro-boot
+│   │       └── settings.py         # Hooks et configuration avancée Kedro
+│   └── pyproject.toml              # Packaging, dépendances et config du sous-projet Kedro
+│
+├── requirements.txt                # Dépendances Python globales du projet
+├── .gitignore                      # Fichiers et dossiers à ignorer par git
+└── README.md                       # Documentation principale du projet
+</code></pre>
+<h2>🚀 Installation</h2>
+<h3>Prérequis</h3>
+<ul>
+<li>Node.js (v18+ recommandé)</li>
+<li>MongoDB (local ou en ligne via MongoDB Atlas)</li>
+</ul>
+<h3>1. Cloner le projet</h3>
+<pre class="prettyprint source lang-bash"><code>git clone https://github.com/J28u/insurance_assistant.git
+cd insurance_assistant
+</code></pre>
+<h3>2. Créer une base MongoDB (pour l'historisation des conversations)</h3>
+<ul>
+<li>appeler cette base 'chatbotdb'</li>
+<li>créer une collection users avec un utilisateur dont l'id est 68235ea293d0a7e8eab16d47</li>
+<li>créer un fichier .env dans /backend/src avec les variables suivantes :</li>
+</ul>
+<pre class="prettyprint source lang-env"><code>MONGODB_URL = mongodb+srv://&lt;db_username>:&lt;db_password>@cluster0.agni83b.mongodb.net/chatbotdb?retryWrites=true&w=majority&appName=Cluster0
+</code></pre>
+<h3>3. Installer les dépendances Python (Kedro, LangChain, etc.)</h3>
+<pre class="prettyprint source lang-bash"><code>pip install -r requirements.txt
+</code></pre>
+<h3>4. Déployer le LLM</h3>
+<ul>
+<li><a href="https://ollama.com/download">installer Ollama</a></li>
+<li>télécharger le modèle choisi depuis Huggingface</li>
+</ul>
+<pre class="prettyprint source"><code>ollama pull hf.co/cognitivecomputations/Dolphin3.0-Llama3.1-8B-GGUF:Q6_K
+</code></pre>
+<ul>
+<li>renseigner le nom du modèle dans le frontend (LLMInput ligne 79)</li>
+</ul>
+<pre class="prettyprint source"><code> model: &quot;hf.co/cognitivecomputations/Dolphin3.0-Llama3.1-8B-GGUF:Q6_K&quot;
+</code></pre>
+<ul>
+<li>lancer le serveur en arrière plan</li>
+</ul>
+<pre class="prettyprint source"><code>ollama serve
+</code></pre>
+<h3>5. Déployer le backend</h3>
+<ul>
+<li>installer les dépendances</li>
+</ul>
+<pre class="prettyprint source lang-bash"><code>cd backend
+npm install
+</code></pre>
+<ul>
+<li>lancer l'api :</li>
+</ul>
+<pre class="prettyprint source lang-bash"><code>cd src
+node index.js
+</code></pre>
+<h3>6. Déployer le frontend</h3>
+<ul>
+<li>installer les dépendances</li>
+</ul>
+<pre class="prettyprint source lang-bash"><code>cd frontend
+npm install
+</code></pre>
+<ul>
+<li>lancer l'application</li>
+</ul>
+<pre class="prettyprint source lang-bash"><code>cd src
+npm run dev
+</code></pre>
+<h3>7. Utilisation des pipelines Kedro</h3>
+<h4>Changer le modèle d'embedding utilisé par le rag:</h4>
+<ul>
+<li>Le chargement d'un pdf, entraine la création d'un vectorstore FAISS, sauvegardé localement dans <a href="kedro_pipelines/data/04_feature/">'data/04_feature/'</a></li>
+<li>Aller dans <a href="kedro_pipelines/conf/base/parameters.yml">conf/base/parameters.yml</a></li>
+</ul>
+<pre class="prettyprint source lang-bash"><code>embedding_model_name: &quot;OrdalieTech/Solon-embeddings-large-0.1&quot;
+</code></pre>
+<p>Par défaut, <a href="https://huggingface.co/OrdalieTech/Solon-embeddings-large-0.1">Solon-embeddings-large-0.1</a> est utilisé.</p>
+<h4>Lancer un pipeline Kedro</h4>
+<ul>
+<li>
+<p>Le dossier <a href="kedro_pipelines/src">src</a> contient des &quot;packages&quot; Kedro, chaque 'package' contient plusieurs pipelines répertoriés dans un fichier <a href="kedro_pipelines/src/rag/pipeline_registry.py">pipeline_registry</a>.</p>
+</li>
+<li>
+<p>Pour choisir quel 'package' faire tourner, il faut modifier le fichier <a href="kedro_pipelines/pyproject.toml">pyproject.toml</a></p>
+</li>
+</ul>
+<pre class="prettyprint source lang-bash"><code>[tool.kedro]
+package_name = &quot;rag&quot;
+</code></pre>
+<ul>
+<li>Pour exécuter un pipeline du package selectionné : kedro run --pipeline &lt;nom_du_pipeline&gt;</li>
+</ul>
+<pre class="prettyprint source lang-bash"><code>kedro run --pipeline embedding
+</code></pre>
+<p>Vous trouverez les noms de pipelines à exécuter dans <a href="kedro_pipelines/src/rag/pipeline_registry.py">pipeline_registry</a>. Par exemple: embedding, classic_rag.</p>
+<p>Pour plus d'options, veuillez consulter la documentation <a href="https://docs.kedro.org">Kedro</a></p>
+<h4>Bonnes pratiques Kedro</h4>
+<ul>
+<li>Ne supprimez aucune ligne du fichier .gitignore fourni.</li>
+<li>Ne versionnez pas de données dans votre dépôt. Gardez les dans <a href="kedro_pipelines/data">'data/'</a></li>
+<li>Ne versionnez pas de mots de passe ou de configuration locale dans votre dépôt. Gardez toutes vos informations sensibles et configurations locales dans <a href="kedro_pipelines/conf/local/">'conf/local/'</a>.</li>
+</ul>
+<h2>📡 API - Endpoint principaux</h2>
+<ul>
+<li>POST /api/conversations/ : créer une nouvelle conversation</li>
+<li>GET /api/conversations/user/:userId : récupérer les conversations d’un utilisateur</li>
+<li>GET /api/conversations/onlyone/:conversationId : récupérer les messages d’une conversation</li>
+<li>POST /api/upload/ : charger des pdfs, les découper en chunks et sauvegarder leurs embeddings dans une base vectorielle.</li>
+<li>GET /api/retriever/prompt_with_context/:question : récupérer un prompt enrichi d'un contexte pertinent.</li>
+</ul>
+<h2>🧩 Composants React</h2>
+<ul>
+<li>LLMInput.jsx : champ de message + boutons pour interagir avec le LLM</li>
+<li>Conversation.jsx : affichage de la conversation (titre, messages utilisateur et LLM)</li>
+<li>App.jsx : assemble l’interface</li>
+</ul>
+<h2>✨ Fonctionnalités</h2>
+<ul>
+<li>Création d'une conversation</li>
+<li>Envoi de messages à un LLM</li>
+<li>Historisation dans MongoDB</li>
+<li>UI dynamique avec React</li>
+</ul>
+<h2>📚 Sources</h2>
+<ul>
+<li>Tutoriel Clone de DeepSeek : <a href="https://www.youtube.com/watch?v=y3K4hji9W8g">Youtube</a></li>
+</ul></article>
+    </section>
+
+
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.4</a> on Wed Aug 27 2025 18:48:02 GMT+0200 (heure d’été d’Europe centrale)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

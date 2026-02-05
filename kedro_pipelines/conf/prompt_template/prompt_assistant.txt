@@ -1,4 +1,4 @@
-Contexte :
+Voici des extraits de documents. 
 {context}
 \n
 Question :

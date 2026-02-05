@@ -45,12 +45,10 @@ def format_context(relevant_chunks: list[Document]) -> str:
         str: Formatted context string.
     """
     context_list = []
-    for n, doc in enumerate(relevant_chunks):
-        title = Path(doc.metadata["source"]).stem
-        content = doc.page_content
-        context_list.append(f"Extrait du document '{title}' :\n{content}")
+    for doc in relevant_chunks:
+        context_list.append(doc.page_content)
 
-    return "\n".join(context_list)
+    return "---\n".join(context_list)
 
 
 def build_prompt_with_context_and_question(

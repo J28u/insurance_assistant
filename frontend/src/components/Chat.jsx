@@ -1,10 +1,11 @@
 import React from "react";
 
 import "../style.css";
-import DeepseekInput from "./DeepseekInput.jsx";
+import LLMInput from "./LLMInput.jsx";
 import Conversation from "./Conversation.jsx";
 
 function Chat({
+  firebaseUser,
   setNewConversation,
   newConversation,
   newChat,
@@ -23,6 +24,8 @@ function Chat({
   setMessages,
   showFirstMessages,
   setShowFirstMessages,
+  context,
+  setContext,
 }) {
   return (
     <div>
@@ -31,12 +34,14 @@ function Chat({
           conversationTitle={conversationTitle}
           convLoading={convLoading}
           messages={messages}
+          context={context}
           loading={loading}
           conversationId={conversationId}
         />
       </div>
       <div>
-        <DeepseekInput
+        <LLMInput
+          firebaseUser={firebaseUser}
           setNewConversation={setNewConversation}
           newConversation={newConversation}
           newChat={newChat}
@@ -53,6 +58,8 @@ function Chat({
           setMessages={setMessages}
           showFirstMessages={showFirstMessages}
           setShowFirstMessages={setShowFirstMessages}
+          context={context}
+          setContext={setContext}
         />
       </div>
     </div>

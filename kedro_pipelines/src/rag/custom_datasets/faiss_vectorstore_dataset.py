@@ -19,7 +19,7 @@ class FaissVectorstoreDataset(AbstractDataset):
 
         self._filepath = filepath
 
-    def _load(self) -> FAISS:
+    def load(self) -> FAISS:
         """Load the FAISS vectorstore from the specified file.
 
         Returns:
@@ -28,14 +28,14 @@ class FaissVectorstoreDataset(AbstractDataset):
         with open(self._filepath, "rb") as f:
             return pickle.load(f)
 
-    def _save(self, database: FAISS):
+    def save(self, data: FAISS):
         """Save the FAISS vectorstore to the specified file.
 
         Args:
             database (FAISS): The FAISS vectorstore object to save.
         """
         with open(self._filepath, "wb") as f:
-            pickle.dump(database, f)
+            pickle.dump(data, f)
             LOGGER.info(f"Vector database successfully saved to {self._filepath}")
 
     def _describe(self) -> dict[str, any]:
@@ -45,3 +45,6 @@ class FaissVectorstoreDataset(AbstractDataset):
             dict[str, any]: A dictionary with dataset attributes.
         """
         return dict(filepath=self._filepath)
+
+    def update_filepath(self, new_filepath):
+        self._filepath = new_filepath

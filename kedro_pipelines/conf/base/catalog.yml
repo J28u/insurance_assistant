@@ -5,8 +5,8 @@
 
 ############### EMBEDDING PIPELINE ###############
 vectorstore:
-  type: rag.datasets.faiss_vectorstore_dataset.FaissVectorstoreDataset
-  filepath: data/04_feature/vectorstore.pkl
+  type: rag.custom_datasets.faiss_vectorstore_dataset.FaissVectorstoreDataset
+  filepath: data/04_feature/fake_vectorstore.pkl
 
 ############### CLASSIC RAG PIPELINE ###############
 prompt_template:
@@ -16,3 +16,7 @@ prompt_template:
 question:
   type: text.TextDataset
   filepath: data/01_raw/question.txt
+
+formatted_context:
+  type: text.TextDataset
+  filepath: data/04_feature/context.txt

@@ -1,4 +1,4 @@
-from kedro.pipeline import Pipeline, node, pipeline
+from kedro.pipeline import Pipeline, node
 
 from .nodes import (
     build_prompt_with_context_and_question,
@@ -8,7 +8,7 @@ from .nodes import (
 
 
 def create_classic_rag_pipeline(**kwargs) -> Pipeline:
-    return pipeline(
+    return Pipeline(
         [
             node(
                 retrieve_relevant_chunks,

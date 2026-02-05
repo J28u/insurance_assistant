@@ -4,10 +4,30 @@ chunk_size: 450
 chunk_overlap: 80
 separators: ["\n\n", "\n"]
 pdf_paths: ["data/01_raw/CG_habitation_RP_protectrice.pdf"]
+pdf_metadata_map:
+  uuid.pdf: "original_filename.pdf"
 
 ############ CLASSIC RAG PIPELINE ############
 top_k_retriever: 1
 retriever_config:
   search_type: "similarity"
   search_kwargs:
-    k: 1
+    k: 3
+
+suspicious_patterns:
+  - '(ignore\s+previous\s+instructions?)'
+  - '(###\s*system\s*message\s*###)'
+  - '(prompt\s*injection)'
+  - "(jailbreak)"
+  - '(do\s+anything\s+now)'
+  - '(bypass\s+restrictions)'
+  - '(override\s+instructions)'
+
+  # Français
+  - '(ignorer\s+les\s+instructions\s+précédentes?)'
+  - '(###\s*message\s*système\s*###)'
+  - '(injection\s*de\s*prompt)'
+  - "(jailbreak)"
+  - '(faire\s+n''importe\s+quoi\s+maintenant)'
+  - '(contourner\s+les\s+restrictions)'
+  - '(outrepasser\s+les\s+instructions)'

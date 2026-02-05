@@ -6,7 +6,10 @@ import "../style.css";
 import { ArrowUp } from "lucide-react";
 import axios from "axios";
 
-function DeepseekInput({
+const API_URL = import.meta.env.VITE_API_URL;
+
+function LLMInput({
+  firebaseUser,
   setNewConversation,
   newConversation,
   newChat,
@@ -23,6 +26,8 @@ function DeepseekInput({
   setMessages,
   showFirstMessages,
   setShowFirstMessages,
+  context,
+  setContext,
 }) {
   const [stop, setStop] = useState(true); // bouton pour arrêter la requête apparait ou non
   const [isAborted, setIsAborted] = useState(false); // savoir si la requête a été annulée ou non
@@ -36,7 +41,8 @@ function DeepseekInput({
   };
 
   // Fonction déclenchée lorsqu'au moins un fichier est sélectionné
-  const handleUpload = async (event) => {
+  const handleUpload = async (event, firebaseUser) => {
+    const token = await firebaseUser.getIdToken();
     const files = event.target.files; // récupère tous les fichiers sélectionnés
     const formData = new FormData(); // Objet pour envoyer des fichiers via HTTP
     for (let i = 0; i < files.length; i++) {
@@ -45,8 +51,13 @@ function DeepseekInput({
 
     try {
       const res = await axios.post(
-        "http://localhost:3000/api/upload",
-        formData // envoi des fichiers au backend
+        `${API_URL}/api/upload`,
+        formData, // envoi des fichiers au backend,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
       );
     } catch (error) {
       console.error(
@@ -56,161 +67,76 @@ function DeepseekInput({
     }
   };
 
-  // Fonction pour créer un titre propre pour une conversation à partir de la question de l'utilisateur
-  const cleanTitle = (text, maxLength = 30) => {
-    if (!text) return "";
-    if (text.length <= maxLength) return text;
-    let truncated = text.slice(0, maxLength);
-    const lastSpace = truncated.lastIndexOf(" ");
-    if (lastSpace > 0) {
-      truncated = truncated.slice(0, lastSpace);
-    }
-    return truncated + "…";
-  };
-
-  const sendLastTwoMessages = async (
-    userId,
-    conversationId,
-    title,
-    messages
-  ) => {
-    try {
-      const response = await axios.post(
-        "http://localhost:3000/api/conversations",
-        {
-          userId: userId,
-          conversationId: conversationId,
-          messages: messages,
-          title: title,
-        }
-      );
-      setConversationId(response.data.conversationId);
-      if (newChat) {
-        setNewConversation(!newConversation);
-      }
-    } catch (error) {
-      console.error(
-        "Error sending last 2 messages:",
-        error.response?.data || error.message
-      );
-    }
-  };
-
-  // Fonction qui récupère le prompt enrichie du context
-  const getPromptWithContext = async () => {
-    try {
-      const response = await axios.get(
-        `http://localhost:3000/api/retriever/prompt_with_context/${prompt}`
-      );
-      console.log("Enriched prompt:", response.data);
-      return response.data.prompt;
-    } catch (error) {
-      console.error(
-        "Error retrieving contexr=t:",
-        error.response ? error.response.data : error.message
-      );
-    }
-  };
-
   // Fonction qui envoie le prompt au LLM et récupère la réponse en format str
   const fetchStream = async () => {
     const controller = new AbortController();
     const signal = controller.signal;
-    var answer = "";
     setAbortController(controller);
     setIsAborted(false);
-    const systemPrompt = `
-    Tu es un expert juridique en assurance. 
-    Réponds uniquement à la question, de manière claire, concise, sans emoji, sans HTML. 
-    Si tu ne sais pas, réponds "Je ne sais pas".
-    `;
 
     var question = prompt;
     setPrompt(""); // vide le champ de saisie
     setStop(false);
-    setMessages((prevMessages) => [
-      ...prevMessages,
-      { role: "user", content: question },
-    ]); //Mets à jour la liste des messages avec le prompt de l'utilisateur
-    var pp = await getPromptWithContext(); // Récupère le prompt enrichi
-    const startTime = performance.now(); // début chrono
+
     try {
-      const res = await fetch("http://localhost:11434/api/chat", {
+      const token = await firebaseUser.getIdToken();
+      const res = await fetch(`${API_URL}/api/chat`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
         body: JSON.stringify({
-          model: "gemma3:4b-it-q4_K_M",
-          messages: [
-            {
-              role: "system",
-              content: systemPrompt,
-            },
-            ...messages,
-            { role: "user", content: pp },
-          ],
-          stream: true,
-          temperature: 0.2,
+          question: question,
+          userPreviousMessages: messages.slice(-10),
+          conversationId: conversationId,
         }),
-        signal: signal, // Permet de dire quelle requête on veut stopper
+        signal: signal,
       });
-      // Mets à jour les messages avec un message vide (pour pouvoir le mettre à jour au fur et à mesure avec les chunks)
+
+      // Mets à jour la liste des messages avec le prompt de l'utilisateur et un message vide (pour pouvoir le mettre à jour au fur et à mesure avec les chunks)
       setMessages((prevMessages) => [
         ...prevMessages,
+        { role: "user", content: question },
         { role: "assistant", content: "" },
       ]);
-      setShowFirstMessages(true); // Affiche page avec les messages (pas la page d'accueil)
+
+      // Affiche page avec les messages (pas la page d'accueil)
+      setShowFirstMessages(true);
 
       if (conversationId == undefined) {
-        setConversationTitle(cleanTitle(question));
+        setConversationTitle(
+          decodeURIComponent(res.headers.get("X-Conversation-Title"))
+        );
+        setConversationId(res.headers.get("X-Conversation-Id"));
       }
 
-      const reader = res.body.getReader(); // Récupère le chunk
-      const decoder = new TextDecoder(); // Transforme le chunk en str
+      if (newChat) {
+        setNewConversation((prev) => !prev);
+      }
 
-      // Boucle tant qu'il y a des chunks
+      // Stream de la réponse
+      const reader = res.body.getReader();
+      const decoder = new TextDecoder();
+      let answer = "";
+
       while (true) {
         const { done, value } = await reader.read();
         if (done) break;
 
-        const decoded = decoder.decode(value);
-        console.log(decoded);
+        const newText = decoder.decode(value);
+        answer += newText;
 
-        // Récupère uniquement le champs "response"
-        const matches = decoded.match(/"content":"(.*?)"/g);
-        if (matches) {
-          const newText = matches
-            // Si correspondance, enlève "response:" puis, enlève les guillemets
-            .map((m) => m.replace(/"content":"/, "").replace(/"$/, ""))
-            // join au cas où plusieurs occurences
-            .join("");
-
-          answer += newText;
-          // met à jour variable dynamique globale
-          setResponse((prev) => prev + newText);
-          console.log(answer);
-          // Met à jour le dernier message avec la réponse (concaténation des chunks)
-          setMessages((prevMessages) => {
-            return prevMessages.map((msg, index) =>
-              index === prevMessages.length - 1
-                ? { ...msg, content: answer }
-                : msg
-            );
-          });
-        }
+        setResponse((prev) => prev + newText);
+        setMessages((prevMessages) => {
+          return prevMessages.map((msg, index) =>
+            index === prevMessages.length - 1
+              ? { ...msg, content: answer }
+              : msg
+          );
+        });
       }
-      sendLastTwoMessages(
-        "68235ea293d0a7e8eab16d47",
-        conversationId,
-        cleanTitle(question),
-        [
-          { role: "user", content: question },
-          { role: "assistant", content: answer },
-        ]
-      );
       setStop(true);
-      const endTime = performance.now(); // fin chrono
-      const duration = endTime - startTime;
-      console.log(`Temps de réponse du LLM ${duration.toFixed(2)} ms`);
     } catch (error) {
       if (error.name === "AbortError") {
         console.log("Request was aborted");
@@ -244,11 +170,10 @@ function DeepseekInput({
             className="custom-input"
             type="text"
             placeholder="Poser une question"
-            // Met à jour la variable prompt si input change
+            autoComplete="off" // évite que le navigateur stocke des questions
             onChange={(e) => {
               setPrompt(e.target.value);
             }}
-            // Exécute la fonction fetchStream() si on appuie sur "Entrée"
             onKeyDown={(e) => {
               if (e.key === "Enter" && prompt.trim() !== "") {
                 fetchStream();
@@ -335,7 +260,7 @@ function DeepseekInput({
                 multiple
                 style={{ display: "none" }} // champ est caché
                 ref={fileInputRef}
-                onChange={handleUpload} // quand il devient "visible" -> déclenche la sélection des fichiers
+                onChange={(event) => handleUpload(event, firebaseUser)} // quand il devient "visible" -> déclenche la sélection des fichiers
               />
             </div>
             <div style={{ marginRight: "10px", marginLeft: "10px" }}>
@@ -431,4 +356,4 @@ function DeepseekInput({
   );
 }
 
-export default DeepseekInput;
+export default LLMInput;

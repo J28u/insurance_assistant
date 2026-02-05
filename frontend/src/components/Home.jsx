@@ -1,9 +1,11 @@
 import React from "react";
 import "../style.css";
-import DeepseekInput from "./DeepseekInput.jsx";
+import LLMInput from "./LLMInput.jsx";
 import macaronIcon from "../assets/macaron.png";
 
 function Home({
+  firebaseUser,
+  handleLogout,
   setNewConversation,
   newConversation,
   newChat,
@@ -20,9 +22,15 @@ function Home({
   setMessages,
   showFirstMessages,
   setShowFirstMessages,
+  context,
+  setContext,
 }) {
   return (
-    <div>
+    <div style={{ position: "relative", minHeight: "100vh", padding: "20px" }}>
+      {/* Bouton déconnexion en haut à droite */}
+      <button className="logout-button" onClick={handleLogout}>
+        Déconnexion
+      </button>
       <div>
         <div>
           <div
@@ -82,7 +90,8 @@ function Home({
       </div>
 
       <div>
-        <DeepseekInput
+        <LLMInput
+          firebaseUser={firebaseUser}
           setNewConversation={setNewConversation}
           newConversation={newConversation}
           newChat={newChat}
@@ -99,6 +108,8 @@ function Home({
           setMessages={setMessages}
           showFirstMessages={showFirstMessages}
           setShowFirstMessages={setShowFirstMessages}
+          context={context}
+          setContext={setContext}
         />
       </div>
     </div>

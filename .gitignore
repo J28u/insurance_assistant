@@ -414,6 +414,7 @@ FodyWeavers.xsd
 
 # ignore everything in the following folders
 **/data/**
+**/notebooks/**
 
 # except their sub-folders
 !**/data/**/
@@ -557,3 +558,7 @@ venv.bak/
 
 # mlflow local runs
 mlruns/*
+
+
+# Firebase Admin credentials (clé privée)
+**/serviceAccountKey.json
